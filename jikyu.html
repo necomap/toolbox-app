@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ja"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>案件別 実質時給 計算ツール｜フリーランスの単価見直しに - 個人事業主の道具箱</title>
+<meta name="description" content="案件ごとの報酬・経費・作業時間から実質時給を計算して比較。目標時給に必要な単価もわかる。フリーランス・個人事業主向け、登録不要・無料。">
+<link rel="stylesheet" href="assets/style.css">
+<style>.bar{height:8px;border-radius:4px;background:var(--accent);min-width:2px}.bar.low{background:var(--warn)}</style>
+</head><body>
+<main class="wrap">
+<h1>案件別 実質時給 計算ツール</h1>
+<p class="lead">「この仕事、結局時給いくらだった？」を案件ごとに見える化します。打ち合わせや修正対応の時間も含めて入れるのがコツです。</p>
+
+<div class="card">
+  <div class="row"><div><label for="goal">目標時給 <small>（円）</small></label><input id="goal" inputmode="numeric" placeholder="例：3000"></div></div>
+  <div class="table-scroll"><table><thead><tr><th>案件名</th><th class="num">報酬（税抜）</th><th class="num">経費</th><th class="num">作業時間(h)</th><th class="num">実質時給</th><th></th></tr></thead><tbody id="rows"></tbody></table></div>
+  <p><button class="sub" id="addRow">＋ 案件を追加</button></p>
+  <div class="result" id="out"></div>
+</div>
+
+<div class="ad-slot">広告スペース</div>
+
+<h2>実質時給の計算方法</h2>
+<p>実質時給 ＝（報酬 − その案件にかかった経費）÷ 実際にかかった作業時間 で計算しています。作業時間には、制作そのものだけでなく、見積もり、打ち合わせ、メール対応、修正、請求などの時間も含めると、実態に近い数字になります。</p>
+<h3>目標時給との差を見る</h3>
+<p>目標時給を入れると、各案件で目標を達成するのに必要だった報酬額がわかります。時給の低い案件は、単価の交渉や作業範囲の見直し、場合によっては受注を控える判断材料になります。</p>
+<h3>時給の目安をどう決めるか</h3>
+<p>会社員時代の年収を労働時間で割った額に、社会保険料や有給休暇がないぶんを上乗せして考える方法がよく使われます。営業や事務など、売上に直結しない時間も見込んでおきましょう。</p>
+<div class="aff"><b>作業時間を自動で記録するなら</b><span class="note">（ここに時間管理ツール等のアフィリエイトリンク）</span></div>
+<h2>あわせて使いたいツール</h2>
+<div id="related"></div>
+</main>
+<script src="assets/common.js"></script>
+<script>
+var st = Store.get('jikyu', {goal:'', items:[{name:'',fee:'',cost:'',hours:''}]});
+var items = st.items && st.items.length ? st.items : [{name:'',fee:'',cost:'',hours:''}];
+goal.value = st.goal||'';
+function n(v){ v=parseFloat(String(v).replace(/[,，円h\s]/g,'')); return isNaN(v)?0:v; }
+function draw(){
+  rows.innerHTML = items.map(function(it,i){
+    return '<tr><td><input data-i="'+i+'" data-k="name" value="'+esc(it.name)+'" placeholder="A社 LP制作"></td>'+
+      '<td><input data-i="'+i+'" data-k="fee" inputmode="numeric" value="'+esc(it.fee)+'" style="width:110px"></td>'+
+      '<td><input data-i="'+i+'" data-k="cost" inputmode="numeric" value="'+esc(it.cost)+'" style="width:90px"></td>'+
+      '<td><input data-i="'+i+'" data-k="hours" inputmode="decimal" value="'+esc(it.hours)+'" style="width:80px"></td>'+
+      '<td class="num" id="r'+i+'"></td><td><button class="del" data-del="'+i+'">削除</button></td></tr>';
+  }).join('');
+}
+function calc(){
+  Store.set('jikyu', {goal:goal.value, items:items});
+  var g=num('goal'), list=[], tf=0, tc=0, th=0;
+  items.forEach(function(it,i){
+    var h=n(it.hours), p=n(it.fee)-n(it.cost), r=h?Math.floor(p/h):0;
+    tf+=n(it.fee); tc+=n(it.cost); th+=h;
+    var c=document.getElementById('r'+i); if(c) c.innerHTML = h ? '<b'+(g&&r<g?' style="color:var(--warn)"':'')+'>'+yen(r)+'</b>' : '';
+    if (h) list.push({name:it.name||'（無題）', r:r, need:g?Math.max(0,Math.ceil(g*h+n(it.cost)-n(it.fee))):0});
+  });
+  if (!list.length){ out.innerHTML='<span class="note">報酬と作業時間を入れると結果が表示されます</span>'; return; }
+  var avg = th?Math.floor((tf-tc)/th):0, max=Math.max.apply(null,list.map(function(x){return x.r;}))||1;
+  list.sort(function(a,b){return b.r-a.r;});
+  out.innerHTML = '<div class="note">全案件の平均 実質時給</div><div class="big">'+yen(avg)+'</div>'+
+    '<table style="margin-top:10px"><tbody>'+list.map(function(x){
+      return '<tr><td>'+esc(x.name)+'</td><td style="width:40%"><div class="bar'+(g&&x.r<g?' low':'')+'" style="width:'+Math.max(0,x.r/max*100)+'%"></div></td><td class="num">'+yen(x.r)+(x.need?'<br><small class="note">目標まで あと'+yen(x.need)+'</small>':'')+'</td></tr>';
+    }).join('')+'</tbody></table>';
+}
+rows.addEventListener('input', function(e){ var t=e.target; if(t.dataset.k){ items[t.dataset.i][t.dataset.k]=t.value; calc(); } });
+rows.addEventListener('click', function(e){ var d=e.target.dataset.del; if(d!=null){ items.splice(+d,1); if(!items.length) items.push({name:'',fee:'',cost:'',hours:''}); draw(); calc(); } });
+addRow.onclick = function(){ items.push({name:'',fee:'',cost:'',hours:''}); draw(); calc(); };
+goal.addEventListener('input', calc);
+draw(); calc();
+</script>
+</body></html>

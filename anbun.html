@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ja"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>家事按分 計算ツール｜按分率と根拠を記録 - 個人事業主の道具箱</title>
+<meta name="description" content="自宅兼事務所の家賃・電気代・通信費などの家事按分を計算し、按分の根拠もまとめて記録・CSV出力。確定申告や税務調査の備えに。登録不要・無料。">
+<link rel="stylesheet" href="assets/style.css">
+</head><body>
+<main class="wrap">
+<h1>家事按分 計算ツール</h1>
+<p class="lead">経費ごとに按分率と「なぜその割合なのか」を記録できます。年末にCSVや印刷で保存しておけば、説明を求められたときにも安心です。</p>
+
+<div class="card no-print">
+  <h3 class="mt0">面積から按分率を出す</h3>
+  <div class="row">
+    <div><label for="aBiz">仕事で使う面積 <small>（㎡）</small></label><input id="aBiz" inputmode="decimal"></div>
+    <div><label for="aAll">住まい全体の面積 <small>（㎡）</small></label><input id="aAll" inputmode="decimal"></div>
+  </div>
+  <p id="areaOut" class="note"></p>
+  <h3>時間から按分率を出す</h3>
+  <div class="row">
+    <div><label for="hBiz">仕事での使用時間 <small>（週）</small></label><input id="hBiz" inputmode="decimal"></div>
+    <div><label for="hAll">全体の使用時間 <small>（週）</small></label><input id="hAll" inputmode="decimal" placeholder="例：168（24時間×7日）"></div>
+  </div>
+  <p id="timeOut" class="note"></p>
+</div>
+
+<div class="card">
+  <div class="row no-print"><div><label for="year">対象年</label><input id="year" inputmode="numeric"></div></div>
+  <div class="table-scroll"><table><thead><tr><th>経費</th><th class="num">年間支払額</th><th class="num">按分率(%)</th><th>根拠・メモ</th><th class="num">経費にする額</th><th class="no-print"></th></tr></thead><tbody id="rows"></tbody></table></div>
+  <p class="no-print"><button class="sub" id="addRow">＋ 行を追加</button> <button class="sub" id="csv">CSVで保存</button> <button class="sub" id="btnPrint">印刷・PDF</button></p>
+  <div class="result" id="out"></div>
+</div>
+
+<div class="ad-slot">広告スペース</div>
+
+<h2>家事按分とは</h2>
+<p>自宅で仕事をしている場合、家賃や光熱費、通信費のうち仕事に使った分だけを経費にできます。この「仕事用」と「生活用」を合理的な基準で分けることを家事按分といいます。</p>
+<h3>よく使われる按分の基準</h3>
+<p><b>家賃</b>は仕事部屋の面積の割合、<b>電気代</b>は仕事での使用時間や機器の使用割合、<b>通信費</b>は仕事での使用時間や用途の割合で分けるのが一般的です。大切なのは、割合を決めた理由を説明できることです。</p>
+<h3>根拠を残しておく理由</h3>
+<p>按分率そのものに決まった正解はありません。税務調査などで聞かれたときに「なぜこの割合か」を説明できないと、否認されるおそれがあります。間取り図や使用時間のメモなどとあわせて、このツールで作った一覧を保存しておきましょう。</p>
+<div class="aff"><b>経費の記録と確定申告をまとめて済ませるなら</b><span class="note">（ここに会計ソフト等のアフィリエイトリンク）</span></div>
+<h2>あわせて使いたいツール</h2>
+<div id="related"></div>
+</main>
+<script src="assets/common.js"></script>
+<script>
+var DEF = [
+  {name:'家賃',amount:'',rate:'',memo:'仕事部屋の面積 ÷ 全体の面積'},
+  {name:'電気代',amount:'',rate:'',memo:'仕事での使用時間の割合'},
+  {name:'インターネット回線',amount:'',rate:'',memo:'仕事での使用時間の割合'},
+  {name:'携帯電話',amount:'',rate:'',memo:'通話・データの仕事利用割合'}
+];
+var st = Store.get('anbun', {year:String(new Date().getFullYear()), items:DEF, aBiz:'',aAll:'',hBiz:'',hAll:''});
+var items = st.items && st.items.length ? st.items : DEF;
+['year','aBiz','aAll','hBiz','hAll'].forEach(function(k){ document.getElementById(k).value = st[k]||''; });
+
+function draw(){
+  rows.innerHTML = items.map(function(it,i){
+    return '<tr><td><input data-i="'+i+'" data-k="name" value="'+esc(it.name)+'"></td>'+
+      '<td><input data-i="'+i+'" data-k="amount" inputmode="numeric" value="'+esc(it.amount)+'" style="width:110px"></td>'+
+      '<td><input data-i="'+i+'" data-k="rate" inputmode="decimal" value="'+esc(it.rate)+'" style="width:70px"></td>'+
+      '<td><input data-i="'+i+'" data-k="memo" value="'+esc(it.memo)+'"></td>'+
+      '<td class="num" id="v'+i+'"></td><td class="no-print"><button class="del" data-del="'+i+'">削除</button></td></tr>';
+  }).join('');
+}
+function n(v){ v=parseFloat(String(v).replace(/[,，円%％\s]/g,'')); return isNaN(v)?0:v; }
+function calc(){
+  var s={items:items}; ['year','aBiz','aAll','hBiz','hAll'].forEach(function(k){ s[k]=document.getElementById(k).value; }); Store.set('anbun', s);
+  var a = num('aAll') ? num('aBiz')/num('aAll')*100 : 0, t = num('hAll') ? num('hBiz')/num('hAll')*100 : 0;
+  areaOut.textContent = a ? '面積による按分率：'+a.toFixed(1)+'%' : '';
+  timeOut.textContent = t ? '時間による按分率：'+t.toFixed(1)+'%' : '';
+  var tot=0, totAll=0;
+  items.forEach(function(it,i){ var v=Math.floor(n(it.amount)*Math.min(100,n(it.rate))/100); tot+=v; totAll+=n(it.amount); var c=document.getElementById('v'+i); if(c) c.textContent = yen(v); });
+  out.innerHTML = '<div class="note">'+esc(document.getElementById('year').value)+'年 経費にする額の合計</div><div class="big">'+yen(tot)+'</div><dl><dt>支払額の合計</dt><dd>'+yen(totAll)+'</dd></dl>';
+}
+rows.addEventListener('input', function(e){ var t=e.target; if(t.dataset.k){ items[t.dataset.i][t.dataset.k]=t.value; calc(); } });
+rows.addEventListener('click', function(e){ var d=e.target.dataset.del; if(d!=null){ items.splice(+d,1); draw(); calc(); } });
+addRow.onclick = function(){ items.push({name:'',amount:'',rate:'',memo:''}); draw(); calc(); };
+['year','aBiz','aAll','hBiz','hAll'].forEach(function(k){ document.getElementById(k).addEventListener('input', calc); });
+btnPrint.onclick = function(){ window.print(); };
+csv.onclick = function(){
+  var q=function(s){ return '"'+String(s==null?'':s).replace(/"/g,'""')+'"'; };
+  var lines=[['経費','年間支払額','按分率(%)','根拠・メモ','経費にする額'].map(q).join(',')];
+  items.forEach(function(it){ lines.push([it.name,n(it.amount),n(it.rate),it.memo,Math.floor(n(it.amount)*Math.min(100,n(it.rate))/100)].map(q).join(',')); });
+  var blob=new Blob(['﻿'+lines.join('\r\n')],{type:'text/csv'}), a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download='家事按分_'+document.getElementById('year').value+'.csv'; a.click();
+};
+draw(); calc();
+</script>
+</body></html>

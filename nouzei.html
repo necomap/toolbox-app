@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ja"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>納税積立カレンダー｜個人事業主の税金はいつ・いくら払う？ - 個人事業主の道具箱</title>
+<meta name="description" content="所得税の予定納税・住民税・国民健康保険・個人事業税・消費税の支払月と、毎月いくら積み立てれば足りるかを自動計算。フリーランス・個人事業主向け、登録不要。">
+<link rel="stylesheet" href="assets/style.css">
+</head><body>
+<main class="wrap">
+<h1>納税積立カレンダー</h1>
+<p class="lead">税金・保険料の年額を入れると、今月から12か月の支払予定と「毎月いくら取り分けておけば足りるか」を計算します。</p>
+
+<div class="card">
+  <p class="note mt0">金額は前年の確定申告書や、自治体から届いた納税通知書の年額を入れてください。わからない項目は0のままでOKです。</p>
+  <div class="grid">
+    <div><label for="itPrev">所得税 前年の納税額 <small>予定納税の判定用</small></label><input id="itPrev" inputmode="numeric"></div>
+    <div><label for="itNow">所得税 今年の見込み額 <small>空欄なら前年と同額</small></label><input id="itNow" inputmode="numeric"></div>
+    <div><label for="jumin">住民税 年額 <small>普通徴収</small></label><input id="jumin" inputmode="numeric"></div>
+    <div><label for="kokuho">国民健康保険 年額</label><input id="kokuho" inputmode="numeric"></div>
+    <div><label for="kokuhoN">国保の納付回数</label><select id="kokuhoN"><option value="10">10回（6月〜翌3月）</option><option value="12">12回（4月〜翌3月）</option><option value="8">8回（7月〜翌2月）</option></select></div>
+    <div><label for="jigyo">個人事業税 年額</label><input id="jigyo" inputmode="numeric"></div>
+    <div><label for="shohi">消費税 年額 <small>課税事業者のみ</small></label><input id="shohi" inputmode="numeric"></div>
+    <div><label for="nenkin">国民年金 月額 <small>口座振替等</small></label><input id="nenkin" inputmode="numeric"></div>
+    <div><label for="saved">いま取り分けてある額</label><input id="saved" inputmode="numeric" placeholder="0"></div>
+  </div>
+  <div class="result" id="out" aria-live="polite"></div>
+</div>
+
+<div class="table-scroll card"><table id="cal"></table></div>
+<p class="note">各期限の日付は年や自治体によって異なります。実際の期限は通知書で確認してください。消費税の中間申告（前年の消費税額が一定額を超える場合）は含めていません。</p>
+
+<div class="ad-slot">広告スペース</div>
+
+<h2>個人事業主が払う税金・保険料の時期</h2>
+<h3>所得税（確定申告・予定納税）</h3>
+<p>確定申告の納税期限は原則3月15日です。前年の申告納税額が15万円以上だと「予定納税」の対象になり、7月と11月にそれぞれ前年税額の3分の1を前払いします。そのぶん翌年3月の納税額は少なくなります。</p>
+<h3>住民税</h3>
+<p>会社員と違い、個人事業主は自分で納める「普通徴収」が一般的です。6月・8月・10月・翌1月の4回払いが基本です。</p>
+<h3>国民健康保険</h3>
+<p>納付回数や時期は市区町村によって違います。多いのは6月から翌3月までの10回払いです。</p>
+<h3>個人事業税・消費税</h3>
+<p>個人事業税は業種と所得によってかかり、原則8月と11月の2回払いです。消費税は課税事業者になると、3月31日までに申告・納税します。</p>
+<h2>積立額の考え方</h2>
+<p>「年額 ÷ 12」だけでは、支払いが集中する月に残高が足りなくなることがあります。このツールでは、今月から積み立てを始めた場合に<b>どの月でも残高がマイナスにならない最小の月額</b>を計算しています。</p>
+
+<div class="aff"><b>税金用の口座を分けておくと管理がラク</b><span class="note">（ここにネット銀行・会計ソフト等のアフィリエイトリンク）</span></div>
+<h2>あわせて使いたいツール</h2>
+<div id="related"></div>
+</main>
+<script src="assets/common.js"></script>
+<script>
+var IDS = ['itPrev','itNow','jumin','kokuho','kokuhoN','jigyo','shohi','nenkin','saved'];
+var st = Store.get('nouzei', {}); IDS.forEach(function(k){ if (st[k]!=null) document.getElementById(k).value = st[k]; });
+
+function schedule(){
+  var itPrev=num('itPrev'), itNow=document.getElementById('itNow').value.trim()?num('itNow'):itPrev;
+  var jumin=num('jumin'), kokuho=num('kokuho'), kN=+kokuhoN.value, jigyo=num('jigyo'), shohi=num('shohi'), nenkin=num('nenkin');
+  var pay = {}; for (var m=1;m<=12;m++) pay[m]=[];
+  var yotei = itPrev >= 150000 ? Math.floor(itPrev/3/100)*100 : 0;
+  if (yotei){ pay[7].push(['所得税 予定納税1期', yotei]); pay[11].push(['所得税 予定納税2期', yotei]); }
+  var kakutei = Math.max(0, itNow - yotei*2);
+  if (kakutei) pay[3].push(['所得税 確定申告', kakutei]);
+  if (jumin){ var j=Math.floor(jumin/4); [[6,jumin-j*3],[8,j],[10,j],[1,j]].forEach(function(p,i){ pay[p[0]].push(['住民税 '+(i+1)+'期', p[1]]); }); }
+  if (kokuho){
+    var months = kN===12?[4,5,6,7,8,9,10,11,12,1,2,3]:kN===8?[7,8,9,10,11,12,1,2]:[6,7,8,9,10,11,12,1,2,3];
+    var k=Math.floor(kokuho/kN); months.forEach(function(mm,i){ pay[mm].push(['国民健康保険 '+(i+1)+'期', i===0?kokuho-k*(kN-1):k]); });
+  }
+  if (jigyo){ var h=Math.floor(jigyo/2); pay[8].push(['個人事業税 1期', jigyo-h]); pay[11].push(['個人事業税 2期', h]); }
+  if (shohi) pay[3].push(['消費税 確定申告', shohi]);
+  if (nenkin) for (var mm=1;mm<=12;mm++) pay[mm].push(['国民年金', nenkin]);
+  return pay;
+}
+function run(){
+  var s={}; IDS.forEach(function(k){ s[k]=document.getElementById(k).value; }); Store.set('nouzei', s);
+  var pay = schedule(), now = new Date(), y=now.getFullYear(), m0=now.getMonth()+1;
+  var rows='', cum=0, need=0, total=0, saved=num('saved'), list=[];
+  for (var i=0;i<12;i++){
+    var m=((m0-1+i)%12)+1, yy=y+Math.floor((m0-1+i)/12);
+    var sum = pay[m].reduce(function(a,p){return a+p[1];},0);
+    cum += sum; total += sum; list.push({y:yy,m:m,items:pay[m],sum:sum});
+    need = Math.max(need, (cum - saved) / (i+1));
+  }
+  need = Math.max(0, Math.ceil(need/100)*100);
+  var bal = saved;
+  list.forEach(function(r){
+    bal += need - r.sum;
+    rows += '<tr><td>'+r.y+'年'+r.m+'月</td><td>'+(r.items.length?r.items.map(function(p){return esc(p[0])+'：'+yen(p[1]);}).join('<br>'):'<span class="note">—</span>')+'</td><td class="num">'+(r.sum?yen(r.sum):'')+'</td><td class="num">'+yen(bal)+'</td></tr>';
+  });
+  cal.innerHTML = '<thead><tr><th>月</th><th>支払うもの</th><th class="num">支払計</th><th class="num">積立残高<br><small>（月末・目安）</small></th></tr></thead><tbody>'+rows+'</tbody>';
+  out.innerHTML = total ? '<div class="note">毎月の積立額（目安）</div><div class="big">'+yen(need)+'</div><dl><dt>今後12か月の支払合計</dt><dd>'+yen(total)+'</dd><dt>単純な月平均</dt><dd>'+yen(Math.ceil(total/12))+'</dd></dl>'
+                    : '<span class="note">金額を入力すると結果が表示されます</span>';
+}
+['input','change'].forEach(function(e){ document.addEventListener(e, run); });
+run();
+</script>
+</body></html>

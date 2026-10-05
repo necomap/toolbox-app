@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ja"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>源泉徴収 逆算ツール｜手取りから請求額を計算 - 個人事業主の道具箱</title>
+<meta name="description" content="フリーランス・個人事業主向け。振込額（手取り）から源泉徴収・消費税込みの請求額を逆算。請求額から振込額の計算も。登録不要・無料。">
+<link rel="stylesheet" href="assets/style.css">
+</head><body>
+<main class="wrap">
+<h1>源泉徴収 逆算ツール</h1>
+<p class="lead">「振込額をちょうど○円にしたい」ときの請求額を逆算します。請求額から振込額を出すこともできます。</p>
+
+<div class="card">
+  <div class="radio" role="radiogroup">
+    <label><input type="radio" name="mode" value="rev" checked> 手取り → 請求額（逆算）</label>
+    <label><input type="radio" name="mode" value="fwd"> 請求額 → 手取り</label>
+  </div>
+  <label for="amt" id="amtLabel">受け取りたい振込額 <small>（円）</small></label>
+  <input id="amt" inputmode="numeric" placeholder="例：100000">
+  <div class="row">
+    <div><label for="rate">消費税</label>
+      <select id="rate"><option value="0.1">10%を加算</option><option value="0.08">8%を加算</option><option value="0">加算しない（免税・内税で考える）</option></select></div>
+    <div><label for="wh">源泉徴収</label>
+      <select id="wh"><option value="1">あり（報酬・料金）</option><option value="0">なし</option></select></div>
+  </div>
+  <div class="result" id="out" aria-live="polite"></div>
+</div>
+
+<div class="ad-slot">広告スペース</div>
+
+<h2>計算のしくみ</h2>
+<p>個人に支払う原稿料・デザイン料・講演料などの報酬は、支払う側が所得税と復興特別所得税を差し引いて振り込みます（源泉徴収）。税率は、1回の支払額が100万円以下の部分は10.21%、100万円を超える部分は20.42%です。1円未満は切り捨てます。</p>
+<p>このツールでは、請求書に消費税額が明確に区分されている前提で、<b>税抜金額を源泉徴収の対象</b>として計算しています。消費税込みの金額を対象にする取引先もあるため、取引先の運用に合わせて確認してください。</p>
+<h3>逆算の考え方</h3>
+<p>「振込額 ＝ 税抜請求額 ＋ 消費税 − 源泉徴収税額」が目標額以上になる、もっとも小さい税抜請求額を求めています。端数の切り捨てがあるため、振込額が目標より数円多くなる場合があります。</p>
+<h3>源泉徴収の対象になる主な報酬</h3>
+<p>原稿・デザイン・講演・翻訳・写真などの報酬が代表例です。プログラミングの受託開発など、対象にならない業務もあります。迷ったら国税庁の「源泉徴収のあらまし」や取引先に確認しましょう。</p>
+
+<div class="aff"><b>請求書づくりもまとめて楽にしたいなら</b>
+<span class="note">（ここに会計ソフト等のアフィリエイトリンクを設置）</span></div>
+
+<h2>あわせて使いたいツール</h2>
+<div id="related"></div>
+</main>
+<script src="assets/common.js"></script>
+<script src="assets/calc.js"></script>
+<script>
+var saved = Store.get('gensen', {mode:'rev', amt:'', rate:'0.1', wh:'1'});
+document.querySelector('input[name=mode][value='+saved.mode+']').checked = true;
+amt.value = saved.amt; rate.value = saved.rate; wh.value = saved.wh;
+function run(){
+  var mode = document.querySelector('input[name=mode]:checked').value;
+  amtLabel.firstChild.textContent = mode==='rev' ? '受け取りたい振込額 ' : '請求額（税抜） ';
+  Store.set('gensen', {mode:mode, amt:amt.value, rate:rate.value, wh:wh.value});
+  var v = num('amt'), r = parseFloat(rate.value), w = wh.value==='1';
+  if (!v){ out.innerHTML = '<span class="note">金額を入力すると結果が表示されます</span>'; return; }
+  var x = mode==='rev' ? Calc.reverse(v, r, w) : Calc.forward(v, r, w);
+  out.innerHTML = (mode==='rev' ? '<div class="note">請求書に書く金額（税抜）</div><div class="big">'+yen(x.amount)+'</div>'
+                                : '<div class="note">振込される金額</div><div class="big">'+yen(x.net)+'</div>') +
+    '<dl><dt>税抜金額</dt><dd>'+yen(x.amount)+'</dd><dt>消費税</dt><dd>'+yen(x.tax)+'</dd><dt>請求合計</dt><dd>'+yen(x.gross)+'</dd>' +
+    '<dt>源泉徴収税額</dt><dd>−'+yen(x.withholding)+'</dd><dt><b>振込額</b></dt><dd><b>'+yen(x.net)+'</b></dd></dl>';
+}
+['input','change'].forEach(function(e){ document.addEventListener(e, run); });
+run();
+</script>
+</body></html>

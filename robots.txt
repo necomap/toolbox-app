@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Disallow: /tests/
+Sitemap: https://tools.lucke.jp/sitemap.xml

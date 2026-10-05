@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="ja"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>無料 請求書作成ツール｜インボイス・源泉徴収対応 - 個人事業主の道具箱</title>
+<meta name="description" content="登録不要・無料でインボイス（適格請求書）形式の請求書を作成しPDF保存。源泉徴収の差し引き、税率ごとの消費税計算に対応。">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+.inv{background:#fff;color:#111;border:1px solid var(--line);border-radius:8px;padding:32px;font-size:13px;line-height:1.6}
+.inv h3{font-size:24px;text-align:center;letter-spacing:.4em;margin:0 0 20px}
+.inv .top{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.inv .to{font-size:16px;border-bottom:1px solid #111;padding-bottom:2px;display:inline-block;min-width:200px}
+.inv .total{font-size:18px;font-weight:700;border-bottom:2px solid #111;display:inline-block;margin:16px 0}
+.inv table th{background:#f1f1f1}
+.inv th,.inv td{border:1px solid #ccc;color:#111}
+.inv .sum{width:60%;margin-left:auto;margin-top:8px}
+.items input,.items select{padding:6px 8px}
+@media print{
+  .editor{display:none!important}
+  .inv{border:0;padding:0}
+  @page{size:A4;margin:15mm}
+}
+</style>
+</head><body>
+<main class="wrap">
+<div class="editor">
+<h1>請求書作成ツール</h1>
+<p class="lead">入力内容はこのブラウザに自動保存されます。「PDFで保存」から印刷画面で「PDFに保存」を選んでください。</p>
+
+<div class="card">
+  <h3 class="mt0">発行者（あなた）</h3>
+  <div class="row">
+    <div><label>屋号・氏名</label><input id="fromName"></div>
+    <div><label>登録番号 <small>（T＋13桁。未登録なら空欄）</small></label><input id="regNo" placeholder="T1234567890123"></div>
+  </div>
+  <label>住所・連絡先 <small>（改行可）</small></label><textarea id="fromAddr" rows="2"></textarea>
+  <label>振込先</label><textarea id="bank" rows="2" placeholder="○○銀行 ○○支店 普通 1234567 ヤマダ タロウ"></textarea>
+
+  <h3>請求先・内容</h3>
+  <div class="row">
+    <div><label>請求先</label><input id="toName" placeholder="株式会社○○"></div>
+    <div><label>敬称</label><select id="honor"><option>御中</option><option>様</option></select></div>
+  </div>
+  <div class="row">
+    <div><label>請求番号</label><input id="invNo"></div>
+    <div><label>請求日</label><input id="invDate" type="date"></div>
+    <div><label>支払期限</label><input id="dueDate" type="date"></div>
+  </div>
+  <label>件名</label><input id="subject" placeholder="○月分 デザイン制作費">
+
+  <h3>明細</h3>
+  <div class="table-scroll"><table class="items"><thead><tr><th>品目</th><th class="num">数量</th><th class="num">単価（税抜）</th><th>税率</th><th></th></tr></thead><tbody id="rows"></tbody></table></div>
+  <p><button class="sub" id="addRow">＋ 行を追加</button></p>
+  <div class="row">
+    <div><label>源泉徴収</label><select id="wh"><option value="0">差し引かない</option><option value="1">差し引く（報酬・料金）</option></select></div>
+    <div><label>備考</label><input id="memo" placeholder="振込手数料はご負担ください 等"></div>
+  </div>
+  <p style="margin-top:16px"><button id="btnPrint">PDFで保存・印刷</button> <button class="sub" id="newInv">新しい請求書（明細をクリア）</button></p>
+  <div class="warn" id="regWarn" hidden>登録番号が空欄のため、適格請求書（インボイス）にはなりません。免税事業者の場合はこのままで問題ありません。</div>
+</div>
+<h2>プレビュー</h2>
+</div>
+
+<div class="inv" id="inv"></div>
+
+<div class="editor">
+<div class="ad-slot">広告スペース</div>
+<h2>インボイス（適格請求書）に必要な項目</h2>
+<p>適格請求書には、①発行者の氏名・名称と登録番号、②取引年月日、③取引内容（軽減税率対象品目である旨）、④税率ごとに区分した合計額と適用税率、⑤税率ごとの消費税額、⑥受け取る側の氏名・名称が必要です。このツールはこれらを自動で記載します。</p>
+<p>消費税額の端数処理は「1つの請求書につき、税率ごとに1回」と決まっています。このツールは税率ごとの合計から消費税を計算し、1円未満を切り捨てています。</p>
+<h2>源泉徴収を差し引く場合</h2>
+<p>個人のデザイン料・原稿料などは、取引先が源泉徴収をして振り込むのが一般的です。請求書に源泉徴収税額と差引請求額を書いておくと、入金額の確認がスムーズです。手取りから逆算したいときは<a href="gensen.html">源泉徴収 逆算ツール</a>が便利です。</p>
+<div class="aff"><b>請求書の発行・入金管理を自動化するなら</b><span class="note">（ここに請求書サービス・会計ソフト等のアフィリエイトリンク）</span></div>
+<h2>あわせて使いたいツール</h2>
+<div id="related"></div>
+</div>
+</main>
+<script src="assets/common.js"></script>
+<script src="assets/calc.js"></script>
+<script>
+var F = ['fromName','regNo','fromAddr','bank','toName','honor','invNo','invDate','dueDate','subject','wh','memo'];
+var today = new Date(); function ymd(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+var endNext = new Date(today.getFullYear(), today.getMonth()+2, 0);
+var st = Store.get('invoice', {invDate: ymd(today), dueDate: ymd(endNext), items:[{name:'',qty:1,price:'',rate:'0.1'}]});
+F.forEach(function(k){ if (st[k]!=null) document.getElementById(k).value = st[k]; });
+var items = st.items && st.items.length ? st.items : [{name:'',qty:1,price:'',rate:'0.1'}];
+
+function drawRows(){
+  rows.innerHTML = items.map(function(it,i){
+    return '<tr><td><input data-i="'+i+'" data-k="name" value="'+esc(it.name)+'"></td>'+
+      '<td><input data-i="'+i+'" data-k="qty" inputmode="decimal" value="'+esc(it.qty)+'" style="width:70px"></td>'+
+      '<td><input data-i="'+i+'" data-k="price" inputmode="numeric" value="'+esc(it.price)+'" style="width:120px"></td>'+
+      '<td><select data-i="'+i+'" data-k="rate"><option value="0.1"'+(it.rate==='0.1'?' selected':'')+'>10%</option><option value="0.08"'+(it.rate==='0.08'?' selected':'')+'>8%※</option><option value="0"'+(it.rate==='0'?' selected':'')+'>対象外</option></select></td>'+
+      '<td><button class="del" data-del="'+i+'">削除</button></td></tr>';
+  }).join('');
+}
+function n(v){ v = parseFloat(String(v).replace(/[,，円\s]/g,'')); return isNaN(v)?0:v; }
+function fmtDate(s){ if(!s) return ''; var p=s.split('-'); return p[0]+'年'+(+p[1])+'月'+(+p[2])+'日'; }
+
+function render(){
+  var s = {}; F.forEach(function(k){ s[k] = document.getElementById(k).value; }); s.items = items; Store.set('invoice', s);
+  regWarn.hidden = !!s.regNo.trim();
+  var by = {'0.1':0,'0.08':0,'0':0}, lines = '';
+  items.forEach(function(it){
+    var amt = Math.floor(n(it.qty) * n(it.price)); by[it.rate] += amt;
+    if (it.name || amt) lines += '<tr><td>'+esc(it.name)+(it.rate==='0.08'?' ※':'')+'</td><td class="num">'+esc(it.qty)+'</td><td class="num">'+n(it.price).toLocaleString()+'</td><td class="num">'+amt.toLocaleString()+'</td><td>'+(it.rate==='0'?'対象外':(it.rate*100)+'%')+'</td></tr>';
+  });
+  var t10 = Math.floor(by['0.1']*0.1), t8 = Math.floor(by['0.08']*0.08);
+  var sub = by['0.1']+by['0.08']+by['0'], tax = t10+t8;
+  var w = s.wh==='1' ? Calc.withholding(sub) : 0;
+  var total = sub + tax - w;
+  var sumRows = '';
+  if (by['0.1']) sumRows += '<tr><th>10%対象（税抜）</th><td class="num">'+yen(by['0.1'])+'</td></tr><tr><th>消費税（10%）</th><td class="num">'+yen(t10)+'</td></tr>';
+  if (by['0.08']) sumRows += '<tr><th>8%対象（税抜）※</th><td class="num">'+yen(by['0.08'])+'</td></tr><tr><th>消費税（8%）</th><td class="num">'+yen(t8)+'</td></tr>';
+  if (by['0']) sumRows += '<tr><th>対象外</th><td class="num">'+yen(by['0'])+'</td></tr>';
+  sumRows += '<tr><th>合計（税込）</th><td class="num">'+yen(sub+tax)+'</td></tr>';
+  if (w) sumRows += '<tr><th>源泉徴収税額</th><td class="num">−'+yen(w)+'</td></tr>';
+  inv.innerHTML = '<h3>請求書</h3><div class="top"><div><div class="to">'+esc(s.toName||'　')+' '+esc(s.honor)+'</div>'+
+    '<p>件名：'+esc(s.subject)+'</p><p>下記のとおりご請求申し上げます。</p><div class="total">ご請求金額　'+yen(total)+'</div>'+
+    '<p>お支払期限：'+fmtDate(s.dueDate)+'</p></div>'+
+    '<div style="text-align:right">'+(s.invNo?'請求番号：'+esc(s.invNo)+'<br>':'')+'請求日：'+fmtDate(s.invDate)+'<br><br><b>'+esc(s.fromName)+'</b><br>'+esc(s.fromAddr).replace(/\n/g,'<br>')+(s.regNo?'<br>登録番号：'+esc(s.regNo):'')+'</div></div>'+
+    '<table style="margin-top:16px"><thead><tr><th>品目</th><th class="num">数量</th><th class="num">単価</th><th class="num">金額（税抜）</th><th>税率</th></tr></thead><tbody>'+(lines||'<tr><td colspan="5">&nbsp;</td></tr>')+'</tbody></table>'+
+    '<table class="sum">'+sumRows+'<tr><th>ご請求金額</th><td class="num"><b>'+yen(total)+'</b></td></tr></table>'+
+    (by['0.08']?'<p>※は軽減税率（8%）対象品目です。</p>':'')+
+    (s.bank?'<p><b>お振込先</b><br>'+esc(s.bank).replace(/\n/g,'<br>')+'</p>':'')+
+    (s.memo?'<p>備考：'+esc(s.memo)+'</p>':'');
+}
+rows.addEventListener('input', function(e){ var t=e.target; if(t.dataset.k){ items[t.dataset.i][t.dataset.k]=t.value; render(); } });
+rows.addEventListener('change', function(e){ var t=e.target; if(t.dataset.k){ items[t.dataset.i][t.dataset.k]=t.value; render(); } });
+rows.addEventListener('click', function(e){ var d=e.target.dataset.del; if(d!=null){ items.splice(+d,1); if(!items.length) items.push({name:'',qty:1,price:'',rate:'0.1'}); drawRows(); render(); } });
+addRow.onclick = function(){ items.push({name:'',qty:1,price:'',rate:'0.1'}); drawRows(); render(); };
+newInv.onclick = function(){ if(confirm('明細・請求先・件名をクリアします（発行者情報は残ります）')){ items=[{name:'',qty:1,price:'',rate:'0.1'}]; ['toName','invNo','subject','memo'].forEach(function(k){document.getElementById(k).value='';}); drawRows(); render(); } };
+btnPrint.onclick = function(){ window.print(); };
+F.forEach(function(k){ var el=document.getElementById(k); el.addEventListener('input',render); el.addEventListener('change',render); });
+drawRows(); render();
+</script>
+</body></html>
