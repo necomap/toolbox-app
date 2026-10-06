@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="ja"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>減価償却 計算ツール｜定額法・少額減価償却資産・一括償却 - 個人事業主の道具箱</title>
+<meta name="description" content="個人事業主向けの減価償却計算。取得価額と使い始めた月から、定額法の毎年の償却費を表で表示。10万円未満・一括償却資産・少額減価償却資産の特例（2026年4月から40万円未満）の判定、中古資産の耐用年数にも対応。">
+
+<link rel="canonical" href="https://toolbox.lucke.jp/genka.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="個人事業主の道具箱">
+<meta property="og:title" content="減価償却 計算ツール｜定額法・少額減価償却資産・一括償却 - 個人事業主の道具箱">
+<meta property="og:description" content="個人事業主向けの減価償却計算。取得価額と使い始めた月から、定額法の毎年の償却費を表で表示。10万円未満・一括償却資産・少額減価償却資産の特例（2026年4月から40万円未満）の判定、中古資産の耐用年数にも対応。">
+<meta property="og:url" content="https://toolbox.lucke.jp/genka.html">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%227%22 fill=%22%231e6b52%22/%3E%3Ctext x=%2216%22 y=%2223%22 font-size=%2218%22 text-anchor=%22middle%22 fill=%22white%22%3E%E9%81%93%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/style.css">
+</head><body>
+<main class="wrap">
+<h1>減価償却 計算ツール</h1>
+<p class="lead">パソコンや車などを買ったとき、その年にいくら経費にできるか、毎年いくらずつ経費になるかを計算します。</p>
+
+<div class="card">
+  <div class="row">
+    <div><label for="kind">資産の種類</label>
+      <select id="kind">
+        <option value="4">パソコン（サーバー以外）… 4年</option>
+        <option value="5">サーバー … 5年</option>
+        <option value="5">複合機・コピー機 … 5年</option>
+        <option value="5">カメラ … 5年</option>
+        <option value="5">ソフトウェア（自社で使うもの）… 5年</option>
+        <option value="6">普通自動車（新車）… 6年</option>
+        <option value="4">軽自動車（新車）… 4年</option>
+        <option value="3">バイク（二輪車）… 3年</option>
+        <option value="2">自転車 … 2年</option>
+        <option value="6">エアコン（冷暖房機器）… 6年</option>
+        <option value="15">事務机・いす（金属製）… 15年</option>
+        <option value="8">事務机・いす（金属製以外）… 8年</option>
+        <option value="22">木造の店舗 … 22年</option>
+        <option value="24">木造の事務所 … 24年</option>
+        <option value="">その他（耐用年数を入力）</option>
+      </select></div>
+    <div><label for="life">法定耐用年数 <small>（年）</small></label><input id="life" inputmode="numeric"></div>
+  </div>
+  <div class="radio" role="radiogroup">
+    <label><input type="radio" name="used" value="0" checked> 新品</label>
+    <label><input type="radio" name="used" value="1"> 中古</label>
+  </div>
+  <div class="row" id="usedBox" hidden>
+    <div><label for="ey">中古：これまでの経過年数 <small>（年）</small></label><input id="ey" inputmode="numeric" placeholder="例：3"></div>
+    <div><label for="em">＋ か月</label><input id="em" inputmode="numeric" placeholder="0〜11"></div>
+  </div>
+  <div class="row">
+    <div><label for="cost">取得価額 <small>（円・税込経理なら税込、税抜経理なら税抜）</small></label><input id="cost" inputmode="numeric" placeholder="例：250000"></div>
+    <div><label for="ratio">事業で使う割合 <small>（%）</small></label><input id="ratio" inputmode="decimal" placeholder="100"></div>
+  </div>
+  <div class="row">
+    <div><label for="sy">使い始めた年</label><input id="sy" inputmode="numeric"></div>
+    <div><label for="sm">使い始めた月</label><select id="sm"></select></div>
+    <div><label for="blue">申告の種類</label><select id="blue"><option value="1">青色申告</option><option value="0">白色申告</option></select></div>
+  </div>
+  <div id="optBox"></div>
+  <div class="result" id="out" aria-live="polite"></div>
+</div>
+
+<div class="ad-slot">広告スペース</div>
+
+<h2>金額ごとの処理のしかた</h2>
+<div class="table-scroll"><table>
+<thead><tr><th>取得価額</th><th>選べる処理</th><th>条件</th></tr></thead>
+<tbody>
+<tr><td>10万円未満</td><td>買った年に全額経費（消耗品費）</td><td>だれでも</td></tr>
+<tr><td>20万円未満</td><td>一括償却資産として3年で均等に経費</td><td>だれでも。月数に関係なく1年分ずつ</td></tr>
+<tr><td>40万円未満</td><td>少額減価償却資産の特例で全額経費</td><td>青色申告のみ。2026年4月1日以後に使い始めたもの（それより前は30万円未満）。年間合計300万円まで。2029年3月31日まで</td></tr>
+<tr><td>上記以外</td><td>法定耐用年数にわたって定額法で償却</td><td>個人事業主は届出をしなければ定額法</td></tr>
+</tbody></table></div>
+<h2>定額法の計算</h2>
+<p>毎年の償却費は「取得価額 × 定額法の償却率」です。償却率は耐用年数ごとに決まっていて（4年なら0.250）、年の途中で使い始めた年は「使った月数 ÷ 12」をかけます。最後の年は帳簿に1円だけ残します（備忘価額）。このツールでは1円未満を切り捨てています。</p>
+<p>自宅と兼用している車やパソコンは、償却費のうち事業で使う割合だけが経費になります。帳簿の残高は、事業で使わない部分も含めて減っていきます。</p>
+<h2>中古資産の耐用年数</h2>
+<p>中古で買った資産は、簡便法で耐用年数を短くできます。一部が経過している場合は「（法定耐用年数 − 経過年数）＋ 経過年数 × 20%」、全部経過している場合は「法定耐用年数 × 20%」で、1年未満は切り捨て、2年に満たない場合は2年です。4年落ちの普通自動車なら2年で償却できます。</p>
+<p class="note">耐用年数は主なものの目安です。正確には国税庁の「主な減価償却資産の耐用年数表」で確認してください。</p>
+
+<div class="aff"><b>固定資産台帳と減価償却は会計ソフトで自動化できます</b><span class="note">（ここに会計ソフト等のアフィリエイトリンク）</span></div>
+<h2>あわせて使いたいツール</h2>
+<div id="related"></div>
+</main>
+<script src="assets/common.js"></script>
+<script src="assets/tax.js"></script>
+<script>
+var $ = function(id){ return document.getElementById(id); };
+for (var i = 1; i <= 12; i++) $('sm').insertAdjacentHTML('beforeend', '<option value="'+i+'">'+i+'月</option>');
+var IDS = ['kind','life','ey','em','cost','ratio','sy','sm','blue'];
+var now = new Date();
+var st = Store.get('genka', {kind:'4', life:'4', sy:String(now.getFullYear()), sm:String(now.getMonth()+1), blue:'1', used:'0', method:''});
+$('kind').selectedIndex = st.kindIndex != null ? st.kindIndex : 0;
+IDS.forEach(function(k){ if (st[k] != null && k !== 'kind') $(k).value = st[k]; });
+document.querySelector('input[name=used][value="'+(st.used||'0')+'"]').checked = true;
+var method = st.method || '', lastOpts = st.lastOpts || '';
+
+$('kind').addEventListener('change', function(){ if (this.value) $('life').value = this.value; });
+var NAMES = {shomo:'全額をその年の経費にする（10万円未満）', ikkatsu:'一括償却資産として3年で均等に経費にする', shogaku:'少額減価償却資産の特例で全額をその年の経費にする', teigaku:'定額法で減価償却する'};
+
+function run(){
+  var used = document.querySelector('input[name=used]:checked').value;
+  $('usedBox').hidden = used !== '1';
+  var s = {used:used, method:method, kindIndex:$('kind').selectedIndex};
+  IDS.forEach(function(k){ s[k] = $(k).value; });
+  Store.set('genka', s);
+  var out = $('out'), cost = Math.floor(num('cost')), L = Math.floor(num('life'));
+  var y = Math.floor(num('sy')), m = +$('sm').value, ratio = $('ratio').value === '' ? 1 : Math.min(100, Math.max(0, num('ratio'))) / 100;
+  if (!cost || !L || !y){ $('optBox').innerHTML = ''; out.innerHTML = '<span class="note">取得価額・耐用年数・使い始めた年を入力すると結果が表示されます</span>'; return; }
+  var life = L, lifeNote = '';
+  if (used === '1'){
+    life = Tax.usedLife(L, Math.floor(num('ey')) * 12 + Math.min(11, Math.floor(num('em'))));
+    lifeNote = '中古の耐用年数（簡便法）：<b>'+life+'年</b>';
+  }
+  var opts = Tax.genkaOptions(cost, $('blue').value === '1', y, m);
+  // 選べる処理が変わったら、いちばん早く経費にできる方法を選び直す
+  if (opts.join() !== lastOpts || opts.indexOf(method) < 0) method = opts[0];
+  lastOpts = opts.join(); s.method = method; s.lastOpts = lastOpts; Store.set('genka', s);
+  $('optBox').innerHTML = '<label>処理のしかた <small>（この金額で選べるもの）</small></label><div class="opts">' + opts.map(function(o){
+    return '<label class="'+(o===method?'on':'')+'"><input type="radio" name="method" value="'+o+'"'+(o===method?' checked':'')+'> '+NAMES[o]+'</label>'; }).join('') + '</div>';
+  var rows;
+  if (method === 'shomo' || method === 'shogaku') rows = [{year:y, dep:cost, expense:Math.floor(cost*ratio), book:0}];
+  else if (method === 'ikkatsu') rows = Tax.ikkatsu(cost, y, ratio).rows;
+  else rows = Tax.teigaku(cost, life, y, m, ratio).rows;
+  var html = '<div class="note">'+y+'年に経費にできる額</div><div class="big">'+yen(rows[0].expense)+'</div>';
+  if (lifeNote) html += '<p class="note">'+lifeNote+'</p>';
+  if (method === 'teigaku') html += '<p class="note">定額法の償却率：'+Tax.teigakuRate(life).toFixed(3)+'　1年目は'+(13-m)+'か月分</p>';
+  if (method === 'shogaku') html += '<p class="note">少額減価償却資産の特例は、その年に取得した対象資産の合計300万円までです。確定申告書に明細を付けます。</p>';
+  html += '<div class="table-scroll"><table><thead><tr><th>年</th><th class="num">償却費</th><th class="num">経費になる額</th><th class="num">年末の帳簿価額</th></tr></thead><tbody>' +
+    rows.map(function(r){ return '<tr><td>'+r.year+'年</td><td class="num">'+yen(r.dep)+'</td><td class="num">'+yen(r.expense)+'</td><td class="num">'+yen(r.book)+'</td></tr>'; }).join('') +
+    '</tbody></table></div>';
+  out.innerHTML = html;
+}
+document.addEventListener('change', function(e){ if (e.target.name === 'method') method = e.target.value; });
+['input','change'].forEach(function(e){ document.addEventListener(e, run); });
+run();
+</script>
+</body></html>

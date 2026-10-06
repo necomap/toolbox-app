@@ -9,7 +9,11 @@
       {href:'invoice.html', name:'請求書・見積書'},
       {href:'nouzei.html',  name:'納税積立カレンダー'},
       {href:'anbun.html',   name:'家事按分'},
-      {href:'jikyu.html',   name:'案件別 時給'}
+      {href:'jikyu.html',   name:'案件別 時給'},
+      {href:'shohizei.html',name:'消費税 比較'},
+      {href:'genka.html',   name:'減価償却'},
+      {href:'inshi.html',   name:'収入印紙'},
+      {href:'furusato.html',name:'ふるさと納税 上限'}
     ]
   };
   window.SITE = SITE;

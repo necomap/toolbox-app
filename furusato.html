@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ja"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ふるさと納税 上限額シミュレーション｜個人事業主・フリーランス向け - 個人事業主の道具箱</title>
+<meta name="description" content="個人事業主・フリーランス向けのふるさと納税の控除上限額シミュレーション。売上・経費・青色申告特別控除・国民健康保険などから、自己負担2,000円で寄附できる目安を計算。2026年の基礎控除の引き上げに対応。">
+
+<link rel="canonical" href="https://toolbox.lucke.jp/furusato.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="個人事業主の道具箱">
+<meta property="og:title" content="ふるさと納税 上限額シミュレーション｜個人事業主・フリーランス向け - 個人事業主の道具箱">
+<meta property="og:description" content="個人事業主・フリーランス向けのふるさと納税の控除上限額シミュレーション。売上・経費・青色申告特別控除・国民健康保険などから、自己負担2,000円で寄附できる目安を計算。2026年の基礎控除の引き上げに対応。">
+<meta property="og:url" content="https://toolbox.lucke.jp/furusato.html">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%227%22 fill=%22%231e6b52%22/%3E%3Ctext x=%2216%22 y=%2223%22 font-size=%2218%22 text-anchor=%22middle%22 fill=%22white%22%3E%E9%81%93%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/style.css">
+</head><body>
+<main class="wrap">
+<h1>ふるさと納税 上限額シミュレーション（個人事業主向け）</h1>
+<p class="lead">会社員向けの早見表は「年収」で調べますが、個人事業主は売上から経費や青色申告特別控除を引いた「所得」で決まります。1年の見込みを入れて、自己負担2,000円で寄附できる目安を出します。</p>
+
+<div class="card">
+  <div class="row">
+    <div><label for="year">寄附する年</label><select id="year"><option value="2026">2026年</option><option value="2027">2027年</option></select></div>
+    <div><label for="aoiro">青色申告特別控除</label>
+      <select id="aoiro"><option value="650000">65万円（e-Taxで電子申告）</option><option value="550000">55万円</option><option value="100000">10万円</option><option value="0">なし（白色申告）</option></select></div>
+  </div>
+  <div class="row">
+    <div><label for="sales">1年間の売上 <small>（円）</small></label><input id="sales" inputmode="numeric" placeholder="例：6000000"></div>
+    <div><label for="expenses">1年間の経費 <small>（円）</small></label><input id="expenses" inputmode="numeric" placeholder="例：1500000"></div>
+  </div>
+  <div class="row">
+    <div><label for="shakai">社会保険料 <small>（円・国保＋国民年金など1年分）</small></label><input id="shakai" inputmode="numeric" placeholder="例：800000"></div>
+    <div><label for="kyosai">小規模企業共済・iDeCo <small>（円・1年分）</small></label><input id="kyosai" inputmode="numeric" placeholder="0"></div>
+  </div>
+  <label class="check"><input type="checkbox" id="spouse"> 配偶者控除の対象になる配偶者がいる</label>
+  <div class="row">
+    <div><label for="fuyoIppan">扶養親族 16〜18歳・23〜69歳 <small>（人）</small></label><input id="fuyoIppan" inputmode="numeric" placeholder="0"></div>
+    <div><label for="fuyoTokutei">19〜22歳 <small>（人）</small></label><input id="fuyoTokutei" inputmode="numeric" placeholder="0"></div>
+    <div><label for="fuyoRojin">70歳以上 <small>（人）</small></label><input id="fuyoRojin" inputmode="numeric" placeholder="0"></div>
+  </div>
+  <details id="more"><summary>給与所得・生命保険料控除などがある場合</summary>
+    <div class="row">
+      <div><label for="other">事業以外の所得 <small>（円・給与所得など）</small></label><input id="other" inputmode="numeric" placeholder="0"></div>
+      <div><label for="otherDed">その他の所得控除 <small>（円・医療費控除など）</small></label><input id="otherDed" inputmode="numeric" placeholder="0"></div>
+    </div>
+    <div class="row">
+      <div><label for="seihoIT">生命保険料控除 所得税 <small>（円・最大12万）</small></label><input id="seihoIT" inputmode="numeric" placeholder="0"></div>
+      <div><label for="seihoJT">生命保険料控除 住民税 <small>（円・最大7万）</small></label><input id="seihoJT" inputmode="numeric" placeholder="0"></div>
+    </div>
+  </details>
+  <div class="result" id="out" aria-live="polite"></div>
+</div>
+
+<div class="ad-slot">広告スペース</div>
+
+<h2>計算のしくみ</h2>
+<p>ふるさと納税の上限は、住民税（所得割）の2割を基準に決まります。このツールでは総務省が示す計算式「住民税所得割額 × 20% ÷（90% − 所得税率 × 1.021）＋ 2,000円」で目安を出しています。</p>
+<p>2026年分と2027年分の所得税は、基礎控除が引き上げられています（合計所得489万円以下なら104万円、655万円以下なら67万円、2,350万円以下なら62万円。それを超えると段階的に縮小）。住民税の基礎控除は43万円のままなので、所得税がかからなくても住民税はかかり、ふるさと納税の枠が残ることがあります。</p>
+<p>2027年以降の寄附は、住民税から差し引かれる特例分に193万円の上限が設けられます。高所得の人は上限額が頭打ちになります。</p>
+<h2>個人事業主が気をつけること</h2>
+<h3>ワンストップ特例は使えない</h3>
+<p>確定申告をする人は、ワンストップ特例を申請していても無効になります。確定申告書の寄附金控除の欄に、すべての寄附を記入してください。</p>
+<h3>所得は見込みで、余裕を持って</h3>
+<p>個人事業主は年末まで所得が確定しません。売上が予想より少なかったり、年末に経費が増えたりすると上限も下がるので、目安の8〜9割にとどめておくと安心です。</p>
+<h3>住宅ローン控除などがある人</h3>
+<p>住宅ローン控除・医療費控除・配当控除などがある場合、実際の上限はこの目安と変わることがあります。</p>
+<p class="note">このシミュレーションは目安です。障害者控除・寡婦控除・ひとり親控除・配偶者特別控除、所得税の税額控除などは考慮していません。住民税は標準税率（10%）で計算しています。</p>
+
+<div class="aff"><b>ふるさと納税はポイント還元のあるサイトで</b><span class="note">（ここにふるさと納税サイトのアフィリエイトリンク）</span></div>
+<h2>あわせて使いたいツール</h2>
+<div id="related"></div>
+</main>
+<script src="assets/common.js"></script>
+<script src="assets/tax.js"></script>
+<script>
+var $ = function(id){ return document.getElementById(id); };
+var IDS = ['year','aoiro','sales','expenses','shakai','kyosai','fuyoIppan','fuyoTokutei','fuyoRojin','other','otherDed','seihoIT','seihoJT'];
+var st = Store.get('furusato', {year:String(Math.min(2027, Math.max(2026, new Date().getFullYear()))), aoiro:'650000'});
+IDS.forEach(function(k){ if (st[k] != null) $(k).value = st[k]; });
+$('spouse').checked = !!st.spouse;
+if (st.other || st.otherDed || st.seihoIT || st.seihoJT) $('more').open = true;
+
+function run(){
+  var s = {spouse:$('spouse').checked}; IDS.forEach(function(k){ s[k] = $(k).value; });
+  Store.set('furusato', s);
+  var out = $('out');
+  if (!num('sales') && !num('other')){ out.innerHTML = '<span class="note">売上を入力すると結果が表示されます</span>'; return; }
+  var o = {spouse:s.spouse, year:+s.year, aoiro:+s.aoiro};
+  IDS.forEach(function(k){ if (k !== 'year' && k !== 'aoiro') o[k] = num(k); });
+  var r = Tax.furusato(o);
+  var html = '<div class="note">自己負担2,000円で寄附できる上限の目安</div><div class="big">'+(r.limit ? yen(r.limit) : '0円')+'</div>';
+  if (!r.limit) html += '<p>住民税の所得割がかからない見込みのため、ふるさと納税をしても税金は減りません。</p>';
+  else html += '<p class="note">余裕を持たせた目安（9割）：'+yen(Math.floor(r.limit*0.9/1000)*1000)+'</p>';
+  html += '<dl><dt>事業所得</dt><dd>'+yen(r.jigyo)+'</dd><dt>合計所得金額</dt><dd>'+yen(r.gokei)+'</dd>' +
+    '<dt>所得税の課税所得</dt><dd>'+yen(r.taxableIT)+'</dd><dt>所得税率</dt><dd>'+Math.round(r.rate*100)+'%</dd>' +
+    '<dt>所得税（復興税込み・見込み）</dt><dd>'+yen(r.incomeTax)+'</dd>' +
+    '<dt>住民税の課税所得</dt><dd>'+yen(r.taxableJT)+'</dd><dt>住民税所得割（見込み）</dt><dd>'+yen(r.shotokuwari)+'</dd></dl>';
+  out.innerHTML = html;
+}
+['input','change'].forEach(function(e){ document.addEventListener(e, run); });
+run();
+</script>
+</body></html>

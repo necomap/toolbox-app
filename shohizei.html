@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="ja"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>消費税 納税額比較｜原則・簡易課税・2割特例・3割特例 - 個人事業主の道具箱</title>
+<meta name="description" content="インボイス登録した個人事業主向け。原則課税・簡易課税・2割特例（2027年からは3割特例）で消費税の納税額がいくらになるかを一度に比較。登録不要・無料。">
+
+<link rel="canonical" href="https://toolbox.lucke.jp/shohizei.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="個人事業主の道具箱">
+<meta property="og:title" content="消費税 納税額比較｜原則・簡易課税・2割特例・3割特例 - 個人事業主の道具箱">
+<meta property="og:description" content="インボイス登録した個人事業主向け。原則課税・簡易課税・2割特例（2027年からは3割特例）で消費税の納税額がいくらになるかを一度に比較。登録不要・無料。">
+<meta property="og:url" content="https://toolbox.lucke.jp/shohizei.html">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%227%22 fill=%22%231e6b52%22/%3E%3Ctext x=%2216%22 y=%2223%22 font-size=%2218%22 text-anchor=%22middle%22 fill=%22white%22%3E%E9%81%93%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/style.css">
+</head><body>
+<main class="wrap">
+<h1>消費税 納税額比較ツール</h1>
+<p class="lead">1年分の売上と経費から、原則課税・簡易課税・2割特例（2027年分からは3割特例）のそれぞれで消費税がいくらになるかを比べます。</p>
+
+<div class="card">
+  <div class="row">
+    <div><label for="year">申告する年分</label>
+      <select id="year"><option value="2026">2026年分（2割特例の最終年）</option><option value="2027">2027年分（3割特例）</option><option value="2028">2028年分（3割特例）</option><option value="2029">2029年分以降</option></select></div>
+    <div><label for="kubun">事業区分（簡易課税）</label>
+      <select id="kubun">
+        <option value="1">第1種 卸売業（90%）</option>
+        <option value="2">第2種 小売業など（80%）</option>
+        <option value="3">第3種 製造業・建設業など（70%）</option>
+        <option value="4">第4種 飲食店など（60%）</option>
+        <option value="5" selected>第5種 サービス業・デザイン・IT・士業など（50%）</option>
+        <option value="6">第6種 不動産業（40%）</option>
+      </select></div>
+  </div>
+  <div class="row">
+    <div><label for="s10">1年間の売上（税込・10%） <small>（円）</small></label><input id="s10" inputmode="numeric" placeholder="例：6600000"></div>
+    <div><label for="p10">消費税のかかる経費（税込・10%） <small>（円）</small></label><input id="p10" inputmode="numeric" placeholder="例：1100000"></div>
+  </div>
+  <details id="det8"><summary>軽減税率（8%）の売上・経費がある場合</summary>
+    <div class="row">
+      <div><label for="s8">売上（税込・8%） <small>（円）</small></label><input id="s8" inputmode="numeric"></div>
+      <div><label for="p8">経費（税込・8%） <small>（円）</small></label><input id="p8" inputmode="numeric"></div>
+    </div>
+  </details>
+  <label for="kijun">2年前の課税売上高（税抜） <small>（円・基準期間。免税事業者だった年は売上そのまま）</small></label>
+  <input id="kijun" inputmode="numeric" placeholder="例：5000000">
+  <label class="check"><input type="checkbox" id="wasExempt" checked> インボイス登録をしていなければ、免税事業者のままだった</label>
+  <div class="result" id="out" aria-live="polite"></div>
+</div>
+
+<div class="ad-slot">広告スペース</div>
+
+<h2>3つの計算方法のちがい</h2>
+<h3>原則課税</h3>
+<p>売上で預かった消費税から、経費で支払った消費税を差し引いて納めます。経費や設備投資が多い年ほど有利で、支払った消費税のほうが多ければ還付も受けられます。家賃（住宅）・人件費・保険料・税金など、消費税がかからない支出は「経費」に含めません。</p>
+<h3>簡易課税</h3>
+<p>経費の額に関係なく、売上の消費税に業種ごとの「みなし仕入率」をかけた額を差し引きます。デザイン・ライター・ITなどのサービス業（第5種）は50%です。使うには、2年前の課税売上高が5,000万円以下で、原則として適用したい年の前年中に「簡易課税制度選択届出書」を出しておく必要があります。</p>
+<h3>2割特例・3割特例</h3>
+<p>インボイス登録をきっかけに免税事業者から課税事業者になった人は、売上の消費税の2割だけを納めればよい「2割特例」を2026年分まで使えます。2027年分と2028年分は、個人事業者に限り納税額を売上の消費税の3割とする「3割特例」に移ります。事前の届出は不要で、確定申告書に適用する旨を書くだけです。2年前の課税売上高が1,000万円を超える年は使えません。</p>
+<h3>2割特例が終わる人の次の一手</h3>
+<p>2割特例を使っていた人が次の年分から簡易課税に切り替える場合は、届出書の提出期限が緩和されています（詳しくは国税庁の「2割特例」の案内で確認してください）。3割特例と簡易課税のどちらが得かは、このツールで年分を切り替えて比べてみてください。</p>
+<p class="note">計算は国税庁の申告書の順序（課税標準額は千円未満切捨て、税率7.8%で国税を計算、差引税額は百円未満切捨て、地方消費税はその22/78）に合わせています。中間納付・貸倒れ・返品などは考慮していません。2つ以上の事業を営む場合の簡易課税は、主な事業の区分で目安を出しています。</p>
+
+<div class="aff"><b>消費税の申告まで会計ソフトで済ませるなら</b><span class="note">（ここに会計ソフト等のアフィリエイトリンク）</span></div>
+<h2>あわせて使いたいツール</h2>
+<div id="related"></div>
+</main>
+<script src="assets/common.js"></script>
+<script src="assets/tax.js"></script>
+<script>
+var IDS = ['year','kubun','s10','p10','s8','p8','kijun'];
+var st = Store.get('shohizei', {year:'2026', kubun:'5', wasExempt:true});
+IDS.forEach(function(k){ if (st[k] != null) document.getElementById(k).value = st[k]; });
+document.getElementById('wasExempt').checked = st.wasExempt !== false;
+if (st.s8 || st.p8) document.getElementById('det8').open = true;
+
+function badge(ok, txt){ return '<span class="badge '+(ok?'ok':'ng')+'">'+txt+'</span>'; }
+function run(){
+  var s = {wasExempt: document.getElementById('wasExempt').checked};
+  IDS.forEach(function(k){ s[k] = document.getElementById(k).value; });
+  Store.set('shohizei', s);
+  var out = document.getElementById('out');
+  var year = +s.year, kijun = num('kijun');
+  if (!num('s10') && !num('s8')){ out.innerHTML = '<span class="note">売上を入力すると結果が表示されます</span>'; return; }
+  var r = Tax.shohi({s10:num('s10'), s8:num('s8'), p10:num('p10'), p8:num('p8'), kubun:+s.kubun, year:year});
+  var rows = [{key:'gensoku', name:'原則課税', v:r.gensoku, ok:true, why:'条件なし'}];
+  var kaniOk = kijun <= 50000000;
+  rows.push({key:'kani', name:'簡易課税（みなし仕入率'+Math.round(r.kani.rate*100)+'%）', v:r.kani, ok:kaniOk,
+    why: kaniOk ? '要届出' : '2年前の課税売上高が5,000万円超'});
+  var tk = Tax.tokurei(year);
+  if (tk){
+    var tOk = kijun <= 10000000 && s.wasExempt;
+    rows.push({key:'tokurei', name:tk.name, v:r.tokurei, ok:tOk,
+      why: !s.wasExempt ? '登録前から課税事業者' : kijun > 10000000 ? '2年前の課税売上高が1,000万円超' : '届出不要'});
+  }
+  var best = null;
+  rows.forEach(function(x){ if (x.ok && (!best || x.v.total < best.v.total)) best = x; });
+  var html = '<div class="note">いちばん納税額が少ない方法</div><div class="big">'+best.name.replace(/（.*/,'')+'：'+yen(Math.max(0,best.v.total))+'</div>';
+  if (best.v.total < 0) html += '<p class="note">'+yen(-best.v.total)+'の還付になります。</p>';
+  html += '<div class="table-scroll"><table><thead><tr><th>計算方法</th><th class="num">納税額</th></tr></thead><tbody>' +
+    rows.map(function(x){ return '<tr'+(x===best?' class="best"':'')+'><td>'+x.name+'<br>'+badge(x.ok, x.ok?'使える':'使えない')+' <span class="note">'+x.why+'</span></td><td class="num">'+yen(x.v.total)+'<br><span class="note">国税 '+yen(x.v.kokuzei)+'<br>地方 '+yen(x.v.chiho)+'</span></td></tr>'; }).join('') +
+    '</tbody></table></div>';
+  html += '<dl><dt>課税標準額</dt><dd>'+yen(r.base)+'</dd><dt>売上の消費税額（国税分）</dt><dd>'+yen(r.saleTax)+'</dd></dl>';
+  if (!tk) html += '<p class="note">2029年分以降は2割特例・3割特例はありません。</p>';
+  out.innerHTML = html;
+}
+['input','change'].forEach(function(e){ document.addEventListener(e, run); });
+run();
+</script>
+</body></html>

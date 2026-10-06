@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ja"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>収入印紙 判定ツール｜領収書・契約書に印紙はいくら？ - 個人事業主の道具箱</title>
+<meta name="description" content="領収書・請負契約書・業務委託契約書に収入印紙が必要か、いくら貼るかを金額から判定。5万円未満の領収書、消費税の扱い、電子発行（PDF）、建設工事の軽減税率にも対応。登録不要・無料。">
+
+<link rel="canonical" href="https://toolbox.lucke.jp/inshi.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="個人事業主の道具箱">
+<meta property="og:title" content="収入印紙 判定ツール｜領収書・契約書に印紙はいくら？ - 個人事業主の道具箱">
+<meta property="og:description" content="領収書・請負契約書・業務委託契約書に収入印紙が必要か、いくら貼るかを金額から判定。5万円未満の領収書、消費税の扱い、電子発行（PDF）、建設工事の軽減税率にも対応。登録不要・無料。">
+<meta property="og:url" content="https://toolbox.lucke.jp/inshi.html">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%227%22 fill=%22%231e6b52%22/%3E%3Ctext x=%2216%22 y=%2223%22 font-size=%2218%22 text-anchor=%22middle%22 fill=%22white%22%3E%E9%81%93%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/style.css">
+</head><body>
+<main class="wrap">
+<h1>収入印紙 判定ツール</h1>
+<p class="lead">領収書や契約書に収入印紙を貼る必要があるか、いくらの印紙が必要かを判定します。</p>
+
+<div class="card">
+  <label class="mt0" for="kind">書類の種類</label>
+  <select id="kind">
+    <option value="ryoshu">領収書・レシート（代金を受け取ったとき）</option>
+    <option value="ukeoi">請負契約書（制作・開発・デザインなど成果物を納める契約）</option>
+    <option value="kensetsu">建設工事の請負契約書</option>
+    <option value="kihon">継続的取引の基本契約書（取引条件をまとめた基本契約）</option>
+    <option value="other">請求書・見積書・納品書／準委任の業務委託契約書</option>
+  </select>
+  <div id="amtBox">
+    <label for="amt">書類に書く金額 <small>（円・税込）</small></label>
+    <input id="amt" inputmode="numeric" placeholder="例：330000">
+    <label class="check"><input type="checkbox" id="sep" checked> 消費税額（または税抜金額）を分けて書く ― 税抜金額で判定します（税率10%）</label>
+    <label class="check"><input type="checkbox" id="noAmt"> 金額を書かない</label>
+  </div>
+  <label class="check" id="nbBox"><input type="checkbox" id="nonBiz"> 営業に関しない受取書（医師・弁護士・税理士などの業務、または個人的な売買）</label>
+  <div id="dateBox"><label for="made">契約書を作る日</label><input id="made" type="date"></div>
+  <label class="check"><input type="checkbox" id="elec"> PDF・メール・電子契約サービスで渡す（紙で渡さない）</label>
+  <div class="result" id="out" aria-live="polite"></div>
+</div>
+
+<div class="ad-slot">広告スペース</div>
+
+<h2>領収書の印紙税額（第17号文書）</h2>
+<div class="table-scroll"><table>
+<thead><tr><th>受取金額</th><th class="num">印紙税額</th></tr></thead>
+<tbody>
+<tr><td>5万円未満</td><td class="num">非課税</td></tr>
+<tr><td>100万円以下</td><td class="num">200円</td></tr>
+<tr><td>100万円超 200万円以下</td><td class="num">400円</td></tr>
+<tr><td>200万円超 300万円以下</td><td class="num">600円</td></tr>
+<tr><td>300万円超 500万円以下</td><td class="num">1,000円</td></tr>
+<tr><td>500万円超 1,000万円以下</td><td class="num">2,000円</td></tr>
+<tr><td>1,000万円超 2,000万円以下</td><td class="num">4,000円</td></tr>
+<tr><td>受取金額の記載なし</td><td class="num">200円</td></tr>
+</tbody></table></div>
+<p class="note">2,000万円を超える金額もツールで判定できます。</p>
+<h2>よくある疑問</h2>
+<h3>請求書に印紙は必要？</h3>
+<p>請求書・見積書・納品書は課税文書ではないため、印紙は不要です。ただし請求書に「領収済み」などと書いて代金を受け取った証明にすると、領収書と同じ扱いになります。</p>
+<h3>消費税は含めて判定する？</h3>
+<p>領収書や請負契約書に消費税額が分けて書かれている場合（税込金額と税抜金額を並べて書いた場合も含む）は、税抜金額で判定します。税込金額だけを書くと、その金額で判定されます。たとえば税込54,000円の領収書は、消費税を分けて書けば税抜49,091円で非課税になります。</p>
+<h3>業務委託契約書は？</h3>
+<p>成果物の完成と引き渡しを約束する契約（ホームページ制作、システム開発、デザイン制作など）は請負契約で、印紙が必要です。作業時間や業務の遂行に対して報酬を払う準委任の契約は、原則として印紙不要です。ただし、継続的な取引の条件を定める基本契約書にあたると4,000円の印紙が必要です。</p>
+<h3>PDFで送れば印紙はいらない？</h3>
+<p>印紙税は紙の文書にかかる税金なので、PDFをメールで送る、電子契約サービスで締結するといった方法なら印紙は不要です。ただしPDFを印刷して紙で渡すと課税されます。</p>
+<p class="note">判定は国税庁の「印紙税額一覧表」にもとづく目安です。建設工事の請負契約書の軽減措置は2027年3月31日までに作成された文書が対象です。迷うときは税務署に確認してください。</p>
+
+<div class="aff"><b>契約書を電子化すれば印紙代がかかりません</b><span class="note">（ここに電子契約サービス等のアフィリエイトリンク）</span></div>
+<h2>あわせて使いたいツール</h2>
+<div id="related"></div>
+</main>
+<script src="assets/common.js"></script>
+<script src="assets/tax.js"></script>
+<script>
+var $ = function(id){ return document.getElementById(id); };
+var IDS = ['kind','amt','made'], CKS = ['sep','noAmt','nonBiz','elec'];
+var st = Store.get('inshi', {kind:'ryoshu', sep:true});
+IDS.forEach(function(k){ if (st[k] != null) $(k).value = st[k]; });
+CKS.forEach(function(k){ $(k).checked = !!st[k]; });
+if (!$('made').value){ var d = new Date(); $('made').value = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+
+function run(){
+  var s = {}; IDS.forEach(function(k){ s[k] = $(k).value; }); CKS.forEach(function(k){ s[k] = $(k).checked; });
+  Store.set('inshi', s);
+  var k = s.kind, out = $('out');
+  $('amtBox').hidden = (k === 'kihon' || k === 'other');
+  $('nbBox').hidden = k !== 'ryoshu';
+  $('dateBox').hidden = k !== 'kensetsu';
+  $('amt').disabled = s.noAmt;
+  var amount = null, basis = '';
+  if (!$('amtBox').hidden && !s.noAmt){
+    var v = Math.floor(num('amt'));
+    if (!v && !s.elec){ out.innerHTML = '<span class="note">金額を入力すると結果が表示されます</span>'; return; }
+    amount = s.sep ? v - Math.floor(v * 10 / 110) : v;
+    basis = s.sep ? '税抜 '+yen(amount)+' で判定' : '税込 '+yen(amount)+' で判定';
+  }
+  var r = Tax.inshi(k, amount, {electronic:s.elec, nonBusiness:s.nonBiz && k === 'ryoshu', after2027: s.made > '2027-03-31'});
+  out.innerHTML = '<div class="note">必要な収入印紙</div><div class="big">'+(r.tax ? yen(r.tax) : '不要')+'</div>' +
+    '<p>'+r.reason+'</p>' + (basis && !s.elec ? '<p class="note">'+(r.no ? r.no+'・' : '')+basis+'</p>' : '') +
+    (r.tax ? '<p class="note">印紙は書類に貼り、書類と印紙の境目に消印（署名や印鑑）をします。貼り忘れると、本来の税額の3倍の過怠税がかかることがあります。</p>' : '');
+}
+['input','change'].forEach(function(e){ document.addEventListener(e, run); });
+run();
+</script>
+</body></html>

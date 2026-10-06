@@ -67,3 +67,20 @@ footer.site a{color:var(--muted)}
   main{padding:0}
 }
 .table-scroll table{min-width:560px}
+/* v0.3 追加 */
+tr.best td{background:var(--accent-soft);font-weight:700}
+.badge{display:inline-block;font-size:12px;border-radius:999px;padding:0 8px;white-space:nowrap}
+.badge.ok{background:var(--accent-soft);color:var(--accent)}
+.badge.ng{background:var(--warn-soft);color:var(--warn)}
+details{margin:12px 0}
+details summary{cursor:pointer;color:var(--accent);font-size:14px;font-weight:600}
+.check{display:flex;align-items:flex-start;gap:8px;font-weight:400;margin:10px 0}
+.check input{width:auto;margin-top:6px}
+.opts{display:grid;gap:8px;margin:8px 0}
+.opts label{display:flex;gap:8px;align-items:flex-start;font-weight:400;margin:0;border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--surface)}
+.opts input{width:auto;margin-top:6px}
+.opts label.on{border-color:var(--accent)}
+[hidden]{display:none!important}
+td.num{white-space:nowrap}
+.result .table-scroll table{min-width:0}
+.result dd{white-space:nowrap}
