@@ -1,0 +1,8 @@
+{
+  // Cloudflare Workers（静的アセット）用の設定
+  "name": "toolbox-app",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./"
+  }
+}

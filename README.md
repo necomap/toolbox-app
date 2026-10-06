@@ -13,11 +13,13 @@
 | jikyu.html | 案件別 実質時給 |
 | privacy.html | プライバシーポリシー（AdSense審査用） |
 
-## 公開手順（Vercel・ユーザー作業）
-1. Vercelで新規プロジェクトを作成し、このフォルダをアップロード（GitHub経由 or `npx vercel` で公開）。Framework は「Other」、ビルドコマンドなし。
-2. Vercelのプロジェクト設定 → Domains で `tools.lucke.jp` を追加。
-3. lucke.jp のDNS管理画面で、表示された CNAME（`tools` → `cname.vercel-dns.com` 等）を登録。
-4. 数分〜数時間でHTTPS付きで公開されます。
+## 公開手順（Cloudflare Pages ＋ お名前.com DNS）
+※ Vercel 無料（Hobby）プランは広告・アフィリエイト設置が規約上不可のため、収益化までは Cloudflare Pages で運用。収益が出たら Vercel Pro へ移行予定（DNSのCNAME先を変えるだけ）。
+1. Cloudflare → Workers & Pages → Create → Pages → Import an existing Git repository → GitHub連携 → `tool-app` を選択
+2. Framework preset: None / Build command: 空欄 / Build output directory: `/` → Save and Deploy
+3. プロジェクト → Custom domains → Set up a custom domain → `tools.lucke.jp`
+4. お名前.com Navi → DNS設定 → lucke.jp → DNSレコード設定に CNAME（ホスト名 `tools` / VALUE `<プロジェクト名>.pages.dev`）を追加
+5. GitHub の main に push すると自動で再公開される
 
 ## 公開後に差し替える箇所
 - `assets/common.js` の `feedbackUrl`（Googleフォーム等）、`tipUrl`（投げ銭リンク）
