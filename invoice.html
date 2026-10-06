@@ -1,8 +1,17 @@
 <!doctype html>
 <html lang="ja"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>無料 請求書作成ツール｜インボイス・源泉徴収対応 - 個人事業主の道具箱</title>
-<meta name="description" content="登録不要・無料でインボイス（適格請求書）形式の請求書を作成しPDF保存。源泉徴収の差し引き、税率ごとの消費税計算に対応。">
+<title>無料 請求書・見積書・納品書作成ツール｜インボイス・源泉徴収対応 - 個人事業主の道具箱</title>
+<meta name="description" content="登録不要・無料でインボイス（適格請求書）形式の請求書・見積書・納品書を作成しPDF保存。源泉徴収の差し引き、税率ごとの消費税計算に対応。">
+
+<link rel="canonical" href="https://toolbox.lucke.jp/invoice.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="個人事業主の道具箱">
+<meta property="og:title" content="無料 請求書・見積書・納品書作成ツール｜インボイス・源泉徴収対応 - 個人事業主の道具箱">
+<meta property="og:description" content="登録不要・無料でインボイス（適格請求書）形式の請求書・見積書・納品書を作成しPDF保存。源泉徴収の差し引き、税率ごとの消費税計算に対応。">
+<meta property="og:url" content="https://toolbox.lucke.jp/invoice.html">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%227%22 fill=%22%231e6b52%22/%3E%3Ctext x=%2216%22 y=%2223%22 font-size=%2218%22 text-anchor=%22middle%22 fill=%22white%22%3E%E9%81%93%3C/text%3E%3C/svg%3E">
 <link rel="stylesheet" href="assets/style.css">
 <style>
 .inv{background:#fff;color:#111;border:1px solid var(--line);border-radius:8px;padding:32px;font-size:13px;line-height:1.6}
@@ -23,11 +32,12 @@
 </head><body>
 <main class="wrap">
 <div class="editor">
-<h1>請求書作成ツール</h1>
+<h1>請求書・見積書・納品書 作成ツール</h1>
 <p class="lead">入力内容はこのブラウザに自動保存されます。「PDFで保存」から印刷画面で「PDFに保存」を選んでください。</p>
 
 <div class="card">
-  <h3 class="mt0">発行者（あなた）</h3>
+  <label class="mt0" for="docType">作成する書類</label><select id="docType"><option value="inv">請求書</option><option value="est">見積書</option><option value="dlv">納品書</option></select>
+  <h3>発行者（あなた）</h3>
   <div class="row">
     <div><label>屋号・氏名</label><input id="fromName"></div>
     <div><label>登録番号 <small>（T＋13桁。未登録なら空欄）</small></label><input id="regNo" placeholder="T1234567890123"></div>
@@ -41,9 +51,9 @@
     <div><label>敬称</label><select id="honor"><option>御中</option><option>様</option></select></div>
   </div>
   <div class="row">
-    <div><label>請求番号</label><input id="invNo"></div>
-    <div><label>請求日</label><input id="invDate" type="date"></div>
-    <div><label>支払期限</label><input id="dueDate" type="date"></div>
+    <div><label id="lNo">請求番号</label><input id="invNo"></div>
+    <div><label>発行日</label><input id="invDate" type="date"></div>
+    <div id="dueBox"><label id="lDue">支払期限</label><input id="dueDate" type="date"></div>
   </div>
   <label>件名</label><input id="subject" placeholder="○月分 デザイン制作費">
 
@@ -54,7 +64,7 @@
     <div><label>源泉徴収</label><select id="wh"><option value="0">差し引かない</option><option value="1">差し引く（報酬・料金）</option></select></div>
     <div><label>備考</label><input id="memo" placeholder="振込手数料はご負担ください 等"></div>
   </div>
-  <p style="margin-top:16px"><button id="btnPrint">PDFで保存・印刷</button> <button class="sub" id="newInv">新しい請求書（明細をクリア）</button></p>
+  <p style="margin-top:16px"><button id="btnPrint">PDFで保存・印刷</button> <button class="sub" id="newInv">新規作成（明細をクリア）</button></p>
   <div class="warn" id="regWarn" hidden>登録番号が空欄のため、適格請求書（インボイス）にはなりません。免税事業者の場合はこのままで問題ありません。</div>
 </div>
 <h2>プレビュー</h2>
@@ -67,6 +77,8 @@
 <h2>インボイス（適格請求書）に必要な項目</h2>
 <p>適格請求書には、①発行者の氏名・名称と登録番号、②取引年月日、③取引内容（軽減税率対象品目である旨）、④税率ごとに区分した合計額と適用税率、⑤税率ごとの消費税額、⑥受け取る側の氏名・名称が必要です。このツールはこれらを自動で記載します。</p>
 <p>消費税額の端数処理は「1つの請求書につき、税率ごとに1回」と決まっています。このツールは税率ごとの合計から消費税を計算し、1円未満を切り捨てています。</p>
+<h2>見積書・納品書も同じ入力で作れます</h2>
+<p>上の「作成する書類」を切り替えると、同じ明細のまま見積書や納品書として出力できます。見積書では「支払期限」が「有効期限」に変わり、振込先は表示されません。見積→納品→請求と、書類を順番に作るときに入力し直す手間が省けます。</p>
 <h2>源泉徴収を差し引く場合</h2>
 <p>個人のデザイン料・原稿料などは、取引先が源泉徴収をして振り込むのが一般的です。請求書に源泉徴収税額と差引請求額を書いておくと、入金額の確認がスムーズです。手取りから逆算したいときは<a href="gensen.html">源泉徴収 逆算ツール</a>が便利です。</p>
 <div class="aff"><b>請求書の発行・入金管理を自動化するなら</b><span class="note">（ここに請求書サービス・会計ソフト等のアフィリエイトリンク）</span></div>
@@ -77,7 +89,7 @@
 <script src="assets/common.js"></script>
 <script src="assets/calc.js"></script>
 <script>
-var F = ['fromName','regNo','fromAddr','bank','toName','honor','invNo','invDate','dueDate','subject','wh','memo'];
+var F = ['docType','fromName','regNo','fromAddr','bank','toName','honor','invNo','invDate','dueDate','subject','wh','memo'];
 var today = new Date(); function ymd(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 var endNext = new Date(today.getFullYear(), today.getMonth()+2, 0);
 var st = Store.get('invoice', {invDate: ymd(today), dueDate: ymd(endNext), items:[{name:'',qty:1,price:'',rate:'0.1'}]});
@@ -114,14 +126,18 @@ function render(){
   if (by['0']) sumRows += '<tr><th>対象外</th><td class="num">'+yen(by['0'])+'</td></tr>';
   sumRows += '<tr><th>合計（税込）</th><td class="num">'+yen(sub+tax)+'</td></tr>';
   if (w) sumRows += '<tr><th>源泉徴収税額</th><td class="num">−'+yen(w)+'</td></tr>';
-  inv.innerHTML = '<h3>請求書</h3><div class="top"><div><div class="to">'+esc(s.toName||'　')+' '+esc(s.honor)+'</div>'+
-    '<p>件名：'+esc(s.subject)+'</p><p>下記のとおりご請求申し上げます。</p><div class="total">ご請求金額　'+yen(total)+'</div>'+
-    '<p>お支払期限：'+fmtDate(s.dueDate)+'</p></div>'+
-    '<div style="text-align:right">'+(s.invNo?'請求番号：'+esc(s.invNo)+'<br>':'')+'請求日：'+fmtDate(s.invDate)+'<br><br><b>'+esc(s.fromName)+'</b><br>'+esc(s.fromAddr).replace(/\n/g,'<br>')+(s.regNo?'<br>登録番号：'+esc(s.regNo):'')+'</div></div>'+
+  var D = {inv:{t:'請求書',no:'請求番号',lead:'下記のとおりご請求申し上げます。',amt:'ご請求金額',due:'お支払期限'},
+           est:{t:'御見積書',no:'見積番号',lead:'下記のとおりお見積り申し上げます。',amt:'お見積金額',due:'有効期限'},
+           dlv:{t:'納品書',no:'納品番号',lead:'下記のとおり納品いたしました。',amt:'合計金額',due:''}}[s.docType||'inv'];
+  lNo.textContent = D.no; lDue.textContent = D.due; dueBox.hidden = !D.due;
+  inv.innerHTML = '<h3>'+D.t+'</h3><div class="top"><div><div class="to">'+esc(s.toName||'　')+' '+esc(s.honor)+'</div>'+
+    '<p>件名：'+esc(s.subject)+'</p><p>'+D.lead+'</p><div class="total">'+D.amt+'　'+yen(total)+'</div>'+
+    (D.due&&s.dueDate?'<p>'+D.due+'：'+fmtDate(s.dueDate)+'</p>':'')+'</div>'+
+    '<div style="text-align:right">'+(s.invNo?D.no+'：'+esc(s.invNo)+'<br>':'')+'発行日：'+fmtDate(s.invDate)+'<br><br><b>'+esc(s.fromName)+'</b><br>'+esc(s.fromAddr).replace(/\n/g,'<br>')+(s.regNo?'<br>登録番号：'+esc(s.regNo):'')+'</div></div>'+
     '<table style="margin-top:16px"><thead><tr><th>品目</th><th class="num">数量</th><th class="num">単価</th><th class="num">金額（税抜）</th><th>税率</th></tr></thead><tbody>'+(lines||'<tr><td colspan="5">&nbsp;</td></tr>')+'</tbody></table>'+
-    '<table class="sum">'+sumRows+'<tr><th>ご請求金額</th><td class="num"><b>'+yen(total)+'</b></td></tr></table>'+
+    '<table class="sum">'+sumRows+'<tr><th>'+D.amt+'</th><td class="num"><b>'+yen(total)+'</b></td></tr></table>'+
     (by['0.08']?'<p>※は軽減税率（8%）対象品目です。</p>':'')+
-    (s.bank?'<p><b>お振込先</b><br>'+esc(s.bank).replace(/\n/g,'<br>')+'</p>':'')+
+    (s.bank&&D.no==='請求番号'?'<p><b>お振込先</b><br>'+esc(s.bank).replace(/\n/g,'<br>')+'</p>':'')+
     (s.memo?'<p>備考：'+esc(s.memo)+'</p>':'');
 }
 rows.addEventListener('input', function(e){ var t=e.target; if(t.dataset.k){ items[t.dataset.i][t.dataset.k]=t.value; render(); } });

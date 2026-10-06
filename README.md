@@ -7,11 +7,12 @@
 |---|---|
 | index.html | トップ（ツール一覧） |
 | gensen.html | 源泉徴収 逆算（手取り⇄請求額） |
-| invoice.html | 請求書作成（インボイス・源泉対応、PDF保存） |
+| invoice.html | 請求書・見積書・納品書作成（インボイス・源泉対応、PDF保存） |
 | nouzei.html | 納税積立カレンダー（支払月と毎月の積立額） |
 | anbun.html | 家事按分（按分率計算・根拠記録・CSV） |
 | jikyu.html | 案件別 実質時給 |
 | privacy.html | プライバシーポリシー（AdSense審査用） |
+| 404.html | ページが見つからない時の案内 |
 
 ## 公開手順（Cloudflare Pages ＋ お名前.com DNS）
 ※ Vercel 無料（Hobby）プランは広告・アフィリエイト設置が規約上不可のため、収益化までは Cloudflare Pages で運用。収益が出たら Vercel Pro へ移行予定（DNSのCNAME先を変えるだけ）。
@@ -28,7 +29,9 @@
 - Google Search Console に `sitemap.xml` を登録
 
 ## テスト
-`node tests/calc.test.js` … 源泉徴収の計算（国税庁の計算方法）と逆算の最小性を検証。
+- `node tests/calc.test.js` … 源泉徴収の計算（国税庁の計算方法）と逆算の最小性を検証（78項目）
+- `python tests/e2e.py` … 全ページのブラウザ動作テスト（49項目：計算値・保存復元・印刷・ダークモード・スマホ幅）。事前に `python -m http.server 8766` をこのフォルダで起動
 
 ## 修正履歴
+- v0.2（2026-10-06）請求書ツールに見積書・納品書の切替を追加／404ページ追加／OGP・canonical・ファビコン追加／時給ツールで全案件が赤字のときグラフ幅が崩れる不具合を修正／ブラウザ自動テスト追加／公開ドメインを toolbox.lucke.jp に確定
 - v0.1（2026-10-06）初版：5ツール＋トップ＋プライバシーポリシー

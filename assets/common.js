@@ -6,7 +6,7 @@
     tipUrl: '',                                   // ← 投げ銭リンク（OFUSE等）。空なら非表示
     tools: [
       {href:'gensen.html',  name:'源泉徴収 逆算'},
-      {href:'invoice.html', name:'請求書作成'},
+      {href:'invoice.html', name:'請求書・見積書'},
       {href:'nouzei.html',  name:'納税積立カレンダー'},
       {href:'anbun.html',   name:'家事按分'},
       {href:'jikyu.html',   name:'案件別 時給'}

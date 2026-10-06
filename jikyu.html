@@ -3,6 +3,15 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>案件別 実質時給 計算ツール｜フリーランスの単価見直しに - 個人事業主の道具箱</title>
 <meta name="description" content="案件ごとの報酬・経費・作業時間から実質時給を計算して比較。目標時給に必要な単価もわかる。フリーランス・個人事業主向け、登録不要・無料。">
+
+<link rel="canonical" href="https://toolbox.lucke.jp/jikyu.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="個人事業主の道具箱">
+<meta property="og:title" content="案件別 実質時給 計算ツール｜フリーランスの単価見直しに - 個人事業主の道具箱">
+<meta property="og:description" content="案件ごとの報酬・経費・作業時間から実質時給を計算して比較。目標時給に必要な単価もわかる。フリーランス・個人事業主向け、登録不要・無料。">
+<meta property="og:url" content="https://toolbox.lucke.jp/jikyu.html">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%227%22 fill=%22%231e6b52%22/%3E%3Ctext x=%2216%22 y=%2223%22 font-size=%2218%22 text-anchor=%22middle%22 fill=%22white%22%3E%E9%81%93%3C/text%3E%3C/svg%3E">
 <link rel="stylesheet" href="assets/style.css">
 <style>.bar{height:8px;border-radius:4px;background:var(--accent);min-width:2px}.bar.low{background:var(--warn)}</style>
 </head><body>
@@ -54,7 +63,7 @@ function calc(){
     if (h) list.push({name:it.name||'（無題）', r:r, need:g?Math.max(0,Math.ceil(g*h+n(it.cost)-n(it.fee))):0});
   });
   if (!list.length){ out.innerHTML='<span class="note">報酬と作業時間を入れると結果が表示されます</span>'; return; }
-  var avg = th?Math.floor((tf-tc)/th):0, max=Math.max.apply(null,list.map(function(x){return x.r;}))||1;
+  var avg = th?Math.floor((tf-tc)/th):0, max=Math.max(1,Math.max.apply(null,list.map(function(x){return x.r;})));
   list.sort(function(a,b){return b.r-a.r;});
   out.innerHTML = '<div class="note">全案件の平均 実質時給</div><div class="big">'+yen(avg)+'</div>'+
     '<table style="margin-top:10px"><tbody>'+list.map(function(x){
