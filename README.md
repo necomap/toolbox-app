@@ -1,4 +1,4 @@
-# 個人事業主の道具箱（tools.lucke.jp）
+# 個人事業主の道具箱（toolbox.lucke.jp）
 
 登録不要・ビルド不要の静的サイトです。HTML/CSS/JSのみで動き、入力データはブラウザ内（localStorage）にだけ保存されます。
 
@@ -17,7 +17,7 @@
 ※ Vercel 無料（Hobby）プランは広告・アフィリエイト設置が規約上不可のため、収益化までは Cloudflare Pages で運用。収益が出たら Vercel Pro へ移行予定（DNSのCNAME先を変えるだけ）。
 1. Cloudflare → Workers & Pages → Create → Pages → Import an existing Git repository → GitHub連携 → `tool-app` を選択
 2. Framework preset: None / Build command: 空欄 / Build output directory: `/` → Save and Deploy
-3. プロジェクト → Custom domains → Set up a custom domain → `tools.lucke.jp`
+3. プロジェクト → Custom domains → Set up a custom domain → `toolbox.lucke.jp`
 4. お名前.com Navi → DNS設定 → lucke.jp → DNSレコード設定に CNAME（ホスト名 `tools` / VALUE `<プロジェクト名>.pages.dev`）を追加
 5. GitHub の main に push すると自動で再公開される
 
