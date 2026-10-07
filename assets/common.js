@@ -2,7 +2,7 @@
 (function(){
   var SITE = {
     name: '個人事業主の道具箱',
-    feedbackUrl: 'https://forms.gle/REPLACE_ME', // ← Googleフォーム等のURLに差し替え
+    feedbackUrl: 'https://forms.gle/5NLXXr4iTYYRayZk6', // お問い合わせ（Googleフォーム）
     tipUrl: '',                                   // ← 投げ銭リンク（OFUSE等）。空なら非表示
     amazonTag: 'lucketool-22',                    // Amazonアソシエイト トラッキングID
     tools: [
@@ -23,15 +23,18 @@
   var h = document.createElement('header'); h.className='site';
   h.innerHTML = '<div class="wrap"><a class="brand" href="index.html">個人事業主の<span>道具箱</span></a><nav class="tools">' +
     SITE.tools.map(function(t){return '<a href="'+t.href+'"'+(t.href===here?' class="on"':'')+'>'+t.name+'</a>';}).join('') +
-    '</nav></div>';
+    '<a href="apps.html"'+(here==='apps.html'?' class="on"':'')+'>ほかのアプリ</a></nav></div>';
   document.body.insertBefore(h, document.body.firstChild);
 
   var f = document.createElement('footer'); f.className='site';
   f.innerHTML = '<div class="wrap">' +
     '<p>計算結果はすべて目安です。最終的な税額・手続きは国税庁・自治体の情報、税理士等でご確認ください。入力内容はお使いのブラウザ内にのみ保存され、サーバーには送信されません。</p>' +
-    '<p><a href="'+SITE.feedbackUrl+'" target="_blank" rel="noopener">結果がおかしい・要望を送る</a>' +
-    (SITE.tipUrl ? ' ・ <a href="'+SITE.tipUrl+'" target="_blank" rel="noopener">開発を応援する（投げ銭）</a>' : '') +
-    ' ・ <a href="privacy.html">プライバシーポリシー</a></p>' +
+    '<p>' + [
+      (SITE.feedbackUrl && SITE.feedbackUrl.indexOf('REPLACE_ME') < 0) ? '<a href="'+SITE.feedbackUrl+'" target="_blank" rel="noopener">お問い合わせ（結果がおかしい・要望）</a>' : '',
+      SITE.tipUrl ? '<a href="'+SITE.tipUrl+'" target="_blank" rel="noopener">開発を応援する（投げ銭）</a>' : '',
+      '<a href="apps.html">ほかのアプリ</a>',
+      '<a href="privacy.html">プライバシーポリシー</a>'
+    ].filter(Boolean).join(' ・ ') + '</p>' +
     (SITE.amazonTag ? '<p>Amazonのアソシエイトとして、当サイトは適格販売により収入を得ています。</p>' : '') +
     '<p>&copy; '+new Date().getFullYear()+' lucke.jp</p></div>';
   document.body.appendChild(f);

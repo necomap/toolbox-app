@@ -18,7 +18,7 @@ with sync_playwright() as p:
         pg = ctx.new_page(); errs = []
         pg.on('pageerror', lambda e: errs.append(str(e)))
         pg.on('console', lambda m: errs.append(m.text) if m.type == 'error' else None)
-        for n in ['index', 'gensen', 'invoice', 'nouzei', 'anbun', 'jikyu', 'shohizei', 'genka', 'inshi', 'furusato', 'privacy', '404']:
+        for n in ['index', 'gensen', 'invoice', 'nouzei', 'anbun', 'jikyu', 'shohizei', 'genka', 'inshi', 'furusato', 'apps', 'privacy', '404']:
             pg.goto(f'{BASE}/{n}.html'); pg.wait_for_timeout(100)
             sw = pg.evaluate('document.documentElement.scrollWidth')
             check(f'[{scheme}] {n} 横スクロールなし', sw <= 391, f'scrollWidth={sw}')

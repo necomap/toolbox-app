@@ -2,7 +2,7 @@
 
 登録不要・ビルド不要の静的サイトです。HTML/CSS/JSのみで動き、入力データはブラウザ内（localStorage）にだけ保存されます。
 
-## 収録ツール（v0.3）
+## 収録ツール（v0.5）
 | ファイル | 内容 |
 |---|---|
 | index.html | トップ（ツール一覧） |
@@ -15,19 +15,28 @@
 | genka.html | 減価償却（定額法・一括償却・少額減価償却資産の特例の判定、中古資産の耐用年数） |
 | inshi.html | 収入印紙 判定（領収書・請負契約書・基本契約書など） |
 | furusato.html | ふるさと納税 上限額（個人事業主向け） |
-| privacy.html | プライバシーポリシー（AdSense審査用） |
+| apps.html | ほかのアプリ一覧（データは assets/apps.js） |
+| privacy.html | プライバシーポリシー |
 | 404.html | ページが見つからない時の案内 |
 
 ## 公開手順（Cloudflare Pages ＋ お名前.com DNS）
 ※ Vercel 無料（Hobby）プランは広告・アフィリエイト設置が規約上不可のため、収益化までは Cloudflare Pages で運用。収益が出たら Vercel Pro へ移行予定（DNSのCNAME先を変えるだけ）。
-1. Cloudflare → Workers & Pages → Create → Pages → Import an existing Git repository → GitHub連携 → `tool-app` を選択
-2. Framework preset: None / Build command: 空欄 / Build output directory: `/` → Save and Deploy
-3. プロジェクト → Custom domains → Set up a custom domain → `toolbox.lucke.jp`
-4. お名前.com Navi → DNS設定 → lucke.jp → DNSレコード設定に CNAME（ホスト名 `tools` / VALUE `<プロジェクト名>.pages.dev`）を追加
-5. GitHub の main に push すると自動で再公開される
+1. Cloudflare →「Workers & Pages」→「アプリケーションを作成」→ 画面いちばん下のリンク「Pages をお探しですか？」から入る（上の「GitHub から」は Workers 用なので使わない）
+2. GitHub 連携で `toolbox-app` を選択。フレームワーク＝なし、ビルドコマンド＝空欄、出力ディレクトリ＝空欄（必須と言われたら `/`）
+3. プロジェクトの「カスタムドメイン」で `toolbox.lucke.jp` を追加
+4. お名前.com Navi → DNS設定 → lucke.jp に CNAME（ホスト名 `toolbox` / VALUE `toolbox-app-edm.pages.dev`）
+5. GitHub の main に Push すると自動で再公開される
+
+## ドキュメント
+- `docs/spec.md` … 仕様書（構成・各ツールの計算仕様・運用・修正履歴）
+- `docs/manual.md` … ユーザーマニュアル（各ツールの使い方・よくある質問）
+
+## ほかのアプリを追加・削除するとき
+- `assets/apps.js` の `APPS` に1行追加（または削除）して Push するだけ。分類（cat）が同じものは同じ見出しの下にまとまる。
+- サムネイルは WordPress.com の mshots サービスでトップページを自動撮影する。初回は数十秒「生成中」の画像になることがある。自前の画像を使うときは `assets/apps/` に置いて `thumb` に指定する。
 
 ## 公開後に差し替える箇所
-- `assets/common.js` の `feedbackUrl`（Googleフォーム等）、`tipUrl`（投げ銭リンク）
+- `assets/common.js` の `tipUrl`（投げ銭リンク）※ `feedbackUrl` は設定済み
 - 各ページの `<div class="ad-slot">` → AdSense の広告コード
 - 各ページの `<div class="aff">` → アフィリエイトリンク（A8.net・もしもアフィリエイト等）
 - Google Search Console に `sitemap.xml` を登録
@@ -35,7 +44,7 @@
 ## テスト
 - `node tests/calc.test.js` … 源泉徴収の計算（国税庁の計算方法）と逆算の最小性を検証（78項目）
 - `node tests/tax.test.js` … 消費税・減価償却・印紙税・ふるさと納税の計算を手計算の期待値で検証（106項目）
-- `python tests/e2e.py` … 全ページのブラウザ動作テスト（80項目：計算値・保存復元・印刷・ダークモード・スマホ幅）。事前に `python -m http.server 8766` をこのフォルダで起動
+- `python tests/e2e.py` … 全ページのブラウザ動作テスト（82項目：計算値・保存復元・印刷・ダークモード・スマホ幅）。事前に `python -m http.server 8766` をこのフォルダで起動
 
 ## 税制の前提（毎年見直す箇所）
 `assets/tax.js` に年ごとのルールがまとまっています。税制改正があったらここを直し、`tests/tax.test.js` を更新してください。
@@ -45,6 +54,7 @@
 - ふるさと納税：所得税の基礎控除は2026・2027年分が104万／67万／62万円の3段階。2027年以降の寄附は特例控除額の上限193万円
 
 ## 修正履歴
+- v0.5（2026-10-07）「ほかのアプリ一覧」ページ（apps.html）を追加。アプリは `assets/apps.js` の一覧に1行足すだけで追加でき、サムネイルはトップページを自動撮影（自前画像も指定可）／ヘッダー・フッター・トップから一覧へリンク／問い合わせURL未設定のときはリンクを非表示に／仕様書（docs/spec.md）とユーザーマニュアル（docs/manual.md）を追加／お問い合わせフォーム（Googleフォーム）を設定
 - v0.4（2026-10-07）Amazonアソシエイト（lucketool-22）のおすすめ枠を各ツールページに追加（`assets/common.js` の `AMAZON` でキーワード管理）／フッターとプライバシーポリシーにアソシエイト表記を追加／リンク未設置のアフィリエイト枠・広告枠を自動で非表示に
 - v0.3（2026-10-06）消費税 納税額比較・減価償却・収入印紙 判定・ふるさと納税 上限額の4ツールを追加／金額が折り返さないよう表示を調整／hidden属性が効かない場合がある不具合を修正
 - v0.2（2026-10-06）請求書ツールに見積書・納品書の切替を追加／404ページ追加／OGP・canonical・ファビコン追加／時給ツールで全案件が赤字のときグラフ幅が崩れる不具合を修正／ブラウザ自動テスト追加／公開ドメインを toolbox.lucke.jp に確定
