@@ -4,6 +4,7 @@
     name: '個人事業主の道具箱',
     feedbackUrl: 'https://forms.gle/REPLACE_ME', // ← Googleフォーム等のURLに差し替え
     tipUrl: '',                                   // ← 投げ銭リンク（OFUSE等）。空なら非表示
+    amazonTag: 'lucketool-22',                    // Amazonアソシエイト トラッキングID
     tools: [
       {href:'gensen.html',  name:'源泉徴収 逆算'},
       {href:'invoice.html', name:'請求書・見積書'},
@@ -31,8 +32,35 @@
     '<p><a href="'+SITE.feedbackUrl+'" target="_blank" rel="noopener">結果がおかしい・要望を送る</a>' +
     (SITE.tipUrl ? ' ・ <a href="'+SITE.tipUrl+'" target="_blank" rel="noopener">開発を応援する（投げ銭）</a>' : '') +
     ' ・ <a href="privacy.html">プライバシーポリシー</a></p>' +
+    (SITE.amazonTag ? '<p>Amazonのアソシエイトとして、当サイトは適格販売により収入を得ています。</p>' : '') +
     '<p>&copy; '+new Date().getFullYear()+' lucke.jp</p></div>';
   document.body.appendChild(f);
+
+  // Amazonアソシエイト枠（ページごとのおすすめ。キーワードを変えるだけで差し替え可）
+  var AMAZON = {
+    'gensen.html':  [['確定申告の解説本（個人事業主向け）','個人事業主 確定申告 本'],['請求書に押す角印','角印 個人事業主'],['請求書の郵送に窓付き封筒','窓付き封筒 長形3号']],
+    'invoice.html': [['請求書に押す角印','角印 個人事業主'],['請求書の郵送に窓付き封筒','窓付き封筒 長形3号'],['インボイス制度の解説本','インボイス制度 本']],
+    'nouzei.html':  [['確定申告の解説本（個人事業主向け）','個人事業主 確定申告 本'],['フリーランスの税金・保険の本','フリーランス 税金 本']],
+    'anbun.html':   [['電気代の按分根拠に使える電力計','ワットチェッカー'],['領収書・レシートの整理ファイル','領収書 整理 ファイル'],['確定申告の解説本（個人事業主向け）','個人事業主 確定申告 本']],
+    'jikyu.html':   [['作業時間を区切るタイマー','ポモドーロ タイマー'],['フリーランスの単価・値決めの本','フリーランス 単価 本']],
+    'shohizei.html':[['インボイス・消費税の解説本','インボイス 消費税 本'],['確定申告の解説本（個人事業主向け）','個人事業主 確定申告 本']],
+    'genka.html':   [['減価償却・勘定科目がわかる本','勘定科目 本 個人事業主'],['確定申告の解説本（個人事業主向け）','個人事業主 確定申告 本']],
+    'inshi.html':   [['複写式の領収書','領収書 複写'],['契約書の書き方がわかる本','契約書 書き方 本']],
+    'furusato.html':[['ふるさと納税の解説本','ふるさと納税 本'],['確定申告の解説本（個人事業主向け）','個人事業主 確定申告 本']]
+  };
+  var relEl = document.getElementById('related');
+  if (SITE.amazonTag && AMAZON[here] && relEl) {
+    var box = document.createElement('div'); box.className = 'aff amazon';
+    box.innerHTML = '<span class="pr">PR</span><b>この作業に役立つ本・グッズ（Amazon）</b><ul>' +
+      AMAZON[here].map(function(a){
+        return '<li><a href="https://www.amazon.co.jp/s?k='+encodeURIComponent(a[1])+'&tag='+SITE.amazonTag+'" target="_blank" rel="sponsored noopener">'+a[0]+'</a></li>';
+      }).join('') + '</ul>';
+    var anchor = relEl.previousElementSibling && relEl.previousElementSibling.tagName === 'H2' ? relEl.previousElementSibling : relEl;
+    anchor.parentNode.insertBefore(box, anchor);
+  }
+  // リンク未設置のアフィリエイト枠・広告枠は非表示（コードを入れると自動で表示）
+  Array.prototype.forEach.call(document.querySelectorAll('.aff'), function(el){ if (!el.querySelector('a,script,iframe,ins')) el.style.display = 'none'; });
+  Array.prototype.forEach.call(document.querySelectorAll('.ad-slot'), function(el){ if (!el.querySelector('script,iframe,ins')) el.style.display = 'none'; });
 
   // 関連ツール
   var rel = document.getElementById('related');
