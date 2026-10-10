@@ -23,10 +23,11 @@ begin
   end if;
 
   with u as (
-    select id, "createdAt" as created_at, plan::text as plan from public.users where plan::text <> 'admin'
+    -- createdAt / updatedAt は「タイムゾーンなし（UTC）」で保存されているので UTC として扱う
+    select id, "createdAt" at time zone 'UTC' as created_at, plan::text as plan from public.users where plan::text <> 'admin'
   ),
   act as (
-    select "userId" as uid, "updatedAt" as at from public.recipes
+    select "userId" as uid, "updatedAt" at time zone 'UTC' as at from public.recipes
     union all select "userId", "createdAt" from public.label_print_logs
     union all select "userId", "createdAt" from public.data_transfer_logs
   )

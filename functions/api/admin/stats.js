@@ -14,7 +14,6 @@ async function appStats(env){
     if (!secret) return {...base, status: 'unset', message: 'Cloudflare の環境変数 ' + a.secret + ' が未設定です'};
     try {
       const s = await withTimeout(a.type === 'firebase' ? firebaseStats(a, secret) : supabaseStats(a, secret), 20000);
-      if (a.type === 'firebase' && !(a.counts || []).length) s.note = 'データ件数を数えるコレクションは未設定です（server/apps.js）';
       return {...base, status: 'ok', ...s};
     } catch(e){ return {...base, status: 'error', message: String(e.message || e)}; }
   }));

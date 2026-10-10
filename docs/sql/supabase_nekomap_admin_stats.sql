@@ -30,7 +30,7 @@ begin
     from (values
       (1, '猫', 'cats'), (2, '目撃情報', 'sightings'), (3, 'ナワバリ', 'territories'),
       (4, '掲示板の投稿', 'posts'), (5, '迷い猫・保護の報告', 'stray_reports'),
-      (6, '困りごとの報告', 'problem_reports'), (7, '譲渡', 'adoptions'), (8, '団体', 'organizations')
+      (6, '困りごとの報告', 'trouble_reports'), (7, '譲渡', 'adoptions'), (8, '団体', 'organizations')
     ) as v(ord, label, tbl)
     where to_regclass('public.' || v.tbl) is not null
   ) t;

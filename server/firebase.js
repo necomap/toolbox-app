@@ -40,8 +40,28 @@ function value(v){
 export async function firebaseStats(app, secretJson, fetchFn = fetch){
   const sa = JSON.parse(secretJson);
   const p = sa.project_id, tok = await accessToken(sa, fetchFn), auth = {Authorization: 'Bearer ' + tok};
-  // 1. Authentication のユーザー（1000件ずつ）
+  // 1. ユーザー一覧：通常は Authentication。独自ログインのアプリは app.users で Firestore のコレクションから数える
   const list = []; let next = '';
+  if (app.users){
+    const u = app.users, fields = [u.created].concat(u.exclude ? [u.exclude[0]] : []).map(f => ({fieldPath: f}));
+    const res = await fetchFn(`https://firestore.googleapis.com/v1/projects/${p}/databases/(default)/documents:runQuery`, {
+      method: 'POST', headers: {...auth, 'Content-Type': 'application/json'},
+      body: JSON.stringify({structuredQuery: {from: [{collectionId: u.collection}], select: {fields}}})
+    });
+    const j = await readJson(res);
+    if (!res.ok) throw new Error('ユーザー一覧を読めません（' + ((j[0] && j[0].error && j[0].error.message) || (j.error && j.error.message) || res.status) + '）');
+    for (const row of Array.isArray(j) ? j : []){
+      if (!row.document) continue;
+      const f = row.document.fields || {};
+      if (u.exclude && fieldValue(f[u.exclude[0]]) === u.exclude[1]) continue;
+      const c = fieldValue(f[u.created]);
+      list.push({created: c ? Date.parse(c) || +c || 0 : Date.parse(row.document.createTime) || 0, last: 0});
+    }
+    const r = summarize(list); r.active7 = null; r.active30 = null;
+    r.activeNote = u.note || '独自ログインのため「利用」した人数は取れません';
+    r.counts = await counts(app, p, auth, fetchFn);
+    return r;
+  }
   for (let page = 0; page < 50; page++){
     const r = await fetchFn(`https://identitytoolkit.googleapis.com/v1/projects/${p}/accounts:batchGet?maxResults=1000` + (next ? '&nextPageToken=' + encodeURIComponent(next) : ''), {headers: auth});
     const j = await readJson(r);
@@ -53,8 +73,16 @@ export async function firebaseStats(app, secretJson, fetchFn = fetch){
     next = j.nextPageToken; if (!next) break;
   }
   const r = summarize(list);
-  // 2. Firestore の件数（集計クエリなので中身は読まない）
-  r.counts = await Promise.all((app.counts || []).map(async c => {
+  r.counts = await counts(app, p, auth, fetchFn);
+  return r;
+}
+function fieldValue(v){
+  if (!v) return null;
+  return v.stringValue ?? v.timestampValue ?? v.integerValue ?? v.doubleValue ?? v.booleanValue ?? null;
+}
+// Firestore の件数（集計クエリなので中身は読まない）
+async function counts(app, p, auth, fetchFn){
+  return Promise.all((app.counts || []).map(async c => {
     const q = {from: [{collectionId: c.collection, allDescendants: !!c.group}]};
     if (c.where) q.where = {fieldFilter: {field: {fieldPath: c.where[0]}, op: 'EQUAL', value: value(c.where[1])}};
     const res = await fetchFn(`https://firestore.googleapis.com/v1/projects/${p}/databases/(default)/documents:runAggregationQuery`, {
@@ -66,5 +94,4 @@ export async function firebaseStats(app, secretJson, fetchFn = fetch){
     const row = Array.isArray(j) ? j.find(x => x.result) : null;
     return {label: c.label, n: row ? +row.result.aggregateFields.n.integerValue : 0};
   }));
-  return r;
 }

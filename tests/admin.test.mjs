@@ -61,6 +61,29 @@ const badFetch = async () => new Response('Host not allowed', {status: 403});
 let msg = ''; try { await firebaseStats(app, JSON.stringify({...sa, client_email: 'other@x'}), badFetch); } catch(e){ msg = e.message; }
 check('Firebase 認証失敗は分かるメッセージ', msg.includes('Google の認証に失敗') && msg.includes('403'), msg);
 
+// 3b. 独自ログインのアプリ：コレクションから人数を数える（デモ除外）
+const colFetch = async (url, opt = {}) => {
+  const res = o => new Response(JSON.stringify(o));
+  if (url.startsWith('https://oauth2')) return res({access_token: 'AT2', expires_in: 3600});
+  if (url.includes(':runQuery')){
+    const q = JSON.parse(opt.body).structuredQuery;
+    check('runQuery の select', q.from[0].collectionId === 'users' && q.select.fields.map(f => f.fieldPath).join() === 'createdAt,storeCode', JSON.stringify(q));
+    return res([
+      {document: {fields: {createdAt: {stringValue: new Date(now - day).toISOString()}, storeCode: {stringValue: 'S1'}}, createTime: 'x'}},
+      {document: {fields: {createdAt: {stringValue: new Date(now - 60 * day).toISOString()}, storeCode: {stringValue: 'S2'}}, createTime: 'x'}},
+      {document: {fields: {createdAt: {stringValue: new Date(now - day).toISOString()}, storeCode: {stringValue: 'DEMO001'}}, createTime: 'x'}},
+      {readTime: 'x'}
+    ]);
+  }
+  if (url.includes('runAggregationQuery')) return res([{result: {aggregateFields: {n: {integerValue: '4'}}}}]);
+  return res({}, 404);
+};
+const cs = await firebaseStats({users: {collection: 'users', created: 'createdAt', exclude: ['storeCode', 'DEMO001']}, counts: [{label: '店舗', collection: 'stores'}]},
+  JSON.stringify({...sa, client_email: 'col@demo'}), colFetch);
+check('コレクション方式 人数（デモ除外）', cs.users === 2, cs.users);
+check('コレクション方式 利用人数は出さない', cs.active7 === null && cs.activeNote.length > 0);
+check('コレクション方式 件数も取れる', cs.counts[0].n === 4, JSON.stringify(cs.counts));
+
 // 4. supabaseStats
 const sb = await supabaseStats({url: 'https://x.supabase.co/', key: 'pk'}, 'tok', async (url, opt) => {
   check('Supabase 呼び出し先', url === 'https://x.supabase.co/rest/v1/rpc/admin_app_stats' && JSON.parse(opt.body).p_token === 'tok' && opt.headers.apikey === 'pk', url);
