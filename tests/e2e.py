@@ -18,7 +18,7 @@ with sync_playwright() as p:
         pg = ctx.new_page(); errs = []
         pg.on('pageerror', lambda e: errs.append(str(e)))
         pg.on('console', lambda m: errs.append(m.text) if m.type == 'error' else None)
-        for n in ['index', 'gensen', 'invoice', 'nouzei', 'anbun', 'jikyu', 'shohizei', 'genka', 'inshi', 'furusato', 'apps', 'privacy', '404']:
+        for n in ['index', 'gensen', 'invoice', 'nouzei', 'anbun', 'jikyu', 'shohizei', 'genka', 'inshi', 'furusato', 'apps', 'backup', 'privacy', '404']:
             pg.goto(f'{BASE}/{n}.html'); pg.wait_for_timeout(100)
             sw = pg.evaluate('document.documentElement.scrollWidth')
             check(f'[{scheme}] {n} 横スクロールなし', sw <= 391, f'scrollWidth={sw}')
@@ -161,6 +161,25 @@ with sync_playwright() as p:
     check('ふるさと 所得割なし→0円', '0円' == pg.inner_text('#out .big'), pg.inner_text('#out'))
     pg.reload()
     check('ふるさと 保存復元', pg.input_value('#sales') == '1500000')
+
+    # --- バックアップ（書き出し→消去→読み込み） ---
+    import os, tempfile
+    pg.goto(f'{BASE}/gensen.html'); pg.fill('#amt', '123456')
+    pg.goto(f'{BASE}/backup.html')
+    check('バックアップ 保存データ一覧に源泉', '源泉徴収 逆算' in pg.inner_text('#summary'))
+    with pg.expect_download() as dl: pg.click('#btnExport')
+    path = os.path.join(tempfile.mkdtemp(), dl.value.suggested_filename); dl.value.save_as(path)
+    check('バックアップ ファイル名', re.match(r'dougubako-backup-\d{8}\.json$', dl.value.suggested_filename), dl.value.suggested_filename)
+    check('バックアップ 前回日時の表示', '前回の書き出し' in pg.inner_text('#last'))
+    pg.evaluate("Object.keys(localStorage).forEach(k=>localStorage.removeItem(k))"); pg.reload()
+    check('バックアップ 消去後は空', 'まだ保存されたデータがありません' in pg.inner_text('#summary'))
+    pg.set_input_files('#file', path); pg.wait_for_selector('#btnImport'); pg.click('#btnImport')
+    check('バックアップ 読み込み完了', '読み込みました' in pg.inner_text('#preview'))
+    pg.goto(f'{BASE}/gensen.html')
+    check('バックアップ 読み込み後に復元', pg.input_value('#amt') == '123456', pg.input_value('#amt'))
+    bad = path + '.bad.json'; open(bad, 'w').write('{"foo":1}')
+    pg.goto(f'{BASE}/backup.html'); pg.set_input_files('#file', bad); pg.wait_for_timeout(200)
+    check('バックアップ 違うファイルは拒否', 'バックアップではない' in pg.inner_text('#preview'))
 
     check('JSエラーなし（操作中）', not errs, str(errs))
     b.close()

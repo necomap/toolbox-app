@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ja"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>データのバックアップ - 個人事業主の道具箱</title>
+<meta name="description" content="個人事業主の道具箱に入力したデータを、ファイルに書き出して保存・別の端末へ移せます。">
+<meta name="robots" content="noindex">
+<link rel="canonical" href="https://toolbox.lucke.jp/backup.html">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%227%22 fill=%22%231e6b52%22/%3E%3Ctext x=%2216%22 y=%2223%22 font-size=%2218%22 text-anchor=%22middle%22 fill=%22white%22%3E%E9%81%93%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/style.css">
+</head><body>
+<main class="wrap">
+<h1>データのバックアップ</h1>
+<p class="lead">入力した内容は、このブラウザの中にだけ保存されています。ブラウザのデータを消したり、Safariでしばらく開かなかったりすると消えることがあるので、ときどきファイルに書き出しておきましょう。書き出したファイルは、別のパソコンやスマホで読み込めます。</p>
+
+<div class="card">
+  <h2 class="mt0">1. ファイルに書き出す</h2>
+  <div id="summary"></div>
+  <p><button id="btnExport">バックアップを書き出す</button></p>
+  <p class="note" id="last"></p>
+</div>
+
+<div class="card">
+  <h2 class="mt0">2. ファイルから読み込む</h2>
+  <p>書き出したファイル（<code>dougubako-backup-日付.json</code>）を選んでください。<b>読み込むと、このブラウザの今のデータは上書きされます。</b></p>
+  <label for="file">バックアップファイル</label>
+  <input type="file" id="file" accept=".json,application/json">
+  <div id="preview"></div>
+</div>
+
+<div class="card">
+  <h2 class="mt0">3. データを消えにくくする</h2>
+  <p>ブラウザに「このサイトのデータは自動で消さないでほしい」と伝えます。ブラウザによっては確認が表示されたり、対応していなかったりします。設定しても、履歴やサイトデータを自分で消した場合は消えます。</p>
+  <p><button class="sub" id="btnPersist">消えにくくする設定をする</button></p>
+  <p class="note" id="persistState"></p>
+</div>
+
+<h2>よくある質問</h2>
+<h3>ファイルにはなにが入っていますか？</h3>
+<p>各ツールに入力した内容（請求書の発行者情報や明細、按分の一覧など）です。運営者のサーバーには送られず、あなたの端末に保存されるだけです。取引先名などが含まれるので、ファイルの取り扱いにはご注意ください。</p>
+<h3>スマホで書き出したファイルはどこにありますか？</h3>
+<p>iPhone は「ファイル」アプリの「ダウンロード」、Android は「ファイル」アプリの「ダウンロード」フォルダに保存されるのが一般的です。</p>
+<h2>道具箱のツール</h2>
+<div id="related"></div>
+</main>
+<script src="assets/common.js"></script>
+<script>
+(function(){
+  var PREFIX = 'dougubako:', META = 'dougubako-meta:lastBackup';
+  var NAMES = {}; SITE.tools.forEach(function(t){ NAMES[t.href.replace('.html','')] = t.name; });
+  function $(id){ return document.getElementById(id); }
+  function collect(){
+    var d = {};
+    try { for (var i = 0; i < localStorage.length; i++){ var k = localStorage.key(i); if (k.indexOf(PREFIX) === 0) d[k.slice(PREFIX.length)] = JSON.parse(localStorage.getItem(k)); } } catch(e){}
+    return d;
+  }
+  function list(d){
+    var ks = Object.keys(d);
+    return ks.length ? '<ul>' + ks.map(function(k){ return '<li>'+esc(NAMES[k] || k)+'</li>'; }).join('') + '</ul>' : '';
+  }
+  function fmt(t){ var d = new Date(t); return d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日 '+d.getHours()+':'+('0'+d.getMinutes()).slice(-2); }
+  function refresh(){
+    var d = collect(), n = Object.keys(d).length;
+    $('summary').innerHTML = n ? '<p>このブラウザに保存されているデータ（'+n+'件）</p>'+list(d) : '<p class="note">このブラウザには、まだ保存されたデータがありません。</p>';
+    $('btnExport').disabled = !n;
+    var last = null; try { last = localStorage.getItem(META); } catch(e){}
+    $('last').textContent = last ? '前回の書き出し：' + fmt(+last) : 'まだ書き出したことがありません。';
+  }
+  $('btnExport').onclick = function(){
+    var now = new Date(), d = collect();
+    var body = JSON.stringify({app:'dougubako', version:1, exportedAt:now.toISOString(), data:d}, null, 2);
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([body], {type:'application/json'}));
+    a.download = 'dougubako-backup-' + now.getFullYear() + ('0'+(now.getMonth()+1)).slice(-2) + ('0'+now.getDate()).slice(-2) + '.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    try { localStorage.setItem(META, String(now.getTime())); } catch(e){}
+    refresh();
+  };
+  var pending = null;
+  $('file').onchange = function(){
+    var f = this.files[0]; pending = null; $('preview').innerHTML = '';
+    if (!f) return;
+    var r = new FileReader();
+    r.onload = function(){
+      var j; try { j = JSON.parse(r.result); } catch(e){ j = null; }
+      if (!j || j.app !== 'dougubako' || typeof j.data !== 'object' || !j.data){
+        $('preview').innerHTML = '<p class="warn-text">このファイルは道具箱のバックアップではないようです。</p>'; return;
+      }
+      pending = j.data;
+      $('preview').innerHTML = '<p>'+(j.exportedAt ? fmt(Date.parse(j.exportedAt))+' に書き出したデータ' : 'バックアップのデータ')+'（'+Object.keys(j.data).length+'件）</p>' + list(j.data) +
+        '<p><button id="btnImport">上書きして読み込む</button></p>';
+      $('btnImport').onclick = function(){
+        try {
+          Object.keys(collect()).forEach(function(k){ localStorage.removeItem(PREFIX + k); });
+          Object.keys(pending).forEach(function(k){ localStorage.setItem(PREFIX + k, JSON.stringify(pending[k])); });
+          $('preview').innerHTML = '<p class="ok-text">読み込みました。各ツールを開くと、バックアップの内容が表示されます。</p>';
+        } catch(e){
+          $('preview').innerHTML = '<p class="warn-text">読み込めませんでした。シークレットモードなど、保存できない状態になっていないか確認してください。</p>';
+        }
+        $('file').value = ''; refresh();
+      };
+    };
+    r.readAsText(f);
+  };
+  function persistState(){
+    if (!(navigator.storage && navigator.storage.persisted)){ $('btnPersist').disabled = true; $('persistState').textContent = 'このブラウザは対応していません。定期的な書き出しで備えてください。'; return; }
+    navigator.storage.persisted().then(function(p){ if (p){ $('btnPersist').disabled = true; $('persistState').textContent = '設定済みです。'; } });
+  }
+  $('btnPersist').onclick = function(){
+    navigator.storage.persist().then(function(ok){
+      $('persistState').textContent = ok ? '設定しました。' : 'ブラウザが許可しませんでした。よく使うサイトほど許可されやすくなります。定期的な書き出しで備えてください。';
+      if (ok) $('btnPersist').disabled = true;
+    });
+  };
+  refresh(); persistState();
+})();
+</script>
+</body></html>

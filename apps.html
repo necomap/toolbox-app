@@ -31,7 +31,7 @@
     return '<h2>'+esc(c)+'</h2><div class="apps">' + APPS.filter(function(a){ return (a.cat || 'その他') === c; }).map(function(a){
       var host = a.url.replace(/^https?:\/\//,'').replace(/\/$/,'');
       var img = a.thumb || ('https://s.wordpress.com/mshots/v1/' + encodeURIComponent(a.url) + '?w=800&h=500');
-      return '<a class="appcard" href="'+esc(a.url)+'" target="_blank" rel="noopener">' +
+      return '<a class="appcard" data-app="'+esc(host.split('.')[0])+'" href="'+esc(a.url)+'" target="_blank" rel="noopener">' +
         '<div class="thumb" data-initial="'+esc(a.name.charAt(0))+'"><img src="'+esc(img)+'" alt="'+esc(a.name)+'のトップページ" loading="lazy" width="800" height="500" onerror="this.remove()"></div>' +
         '<div class="body"><div class="t">'+esc(a.name)+'</div><div class="d">'+esc(a.desc || '')+'</div><div class="u">'+esc(host)+' ↗</div></div></a>';
     }).join('') + '</div>';

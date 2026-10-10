@@ -1,4 +1,9 @@
 User-agent: *
 Allow: /
 Disallow: /tests/
+Disallow: /admin/
+Disallow: /api/
+Disallow: /functions/
+Disallow: /docs/
+Disallow: /server/
 Sitemap: https://toolbox.lucke.jp/sitemap.xml

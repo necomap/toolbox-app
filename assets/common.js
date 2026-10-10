@@ -18,7 +18,10 @@
     ]
   };
   window.SITE = SITE;
+  // Cloudflare Pages は /gensen.html を /gensen に転送するので、拡張子なしでも同じページ名にそろえる
   var here = location.pathname.split('/').pop() || 'index.html';
+  if (here.indexOf('.') < 0) here += '.html';
+  SITE.page = here.replace('.html', '');
 
   var h = document.createElement('header'); h.className='site';
   h.innerHTML = '<div class="wrap"><a class="brand" href="index.html">個人事業主の<span>道具箱</span></a><nav class="tools">' +
@@ -28,10 +31,11 @@
 
   var f = document.createElement('footer'); f.className='site';
   f.innerHTML = '<div class="wrap">' +
-    '<p>計算結果はすべて目安です。最終的な税額・手続きは国税庁・自治体の情報、税理士等でご確認ください。入力内容はお使いのブラウザ内にのみ保存され、サーバーには送信されません。</p>' +
+    '<p>計算結果はすべて目安です。最終的な税額・手続きは国税庁・自治体の情報、税理士等でご確認ください。入力内容はお使いのブラウザ内にのみ保存され、サーバーには送信されません。どのツールが使われたかを知るため、入力内容を含まない匿名の利用回数だけを記録しています（<a href="backup.html">ファイルにバックアップ</a>できます）。</p>' +
     '<p>' + [
       (SITE.feedbackUrl && SITE.feedbackUrl.indexOf('REPLACE_ME') < 0) ? '<a href="'+SITE.feedbackUrl+'" target="_blank" rel="noopener">お問い合わせ（結果がおかしい・要望）</a>' : '',
       SITE.tipUrl ? '<a href="'+SITE.tipUrl+'" target="_blank" rel="noopener">開発を応援する（投げ銭）</a>' : '',
+      '<a href="backup.html">データのバックアップ</a>',
       '<a href="apps.html">ほかのアプリ</a>',
       '<a href="privacy.html">プライバシーポリシー</a>'
     ].filter(Boolean).join(' ・ ') + '</p>' +
@@ -82,3 +86,45 @@ var Store = {
 function yen(n){ return (Math.round(n)||0).toLocaleString('ja-JP') + '円'; }
 function num(id){ var v = String(document.getElementById(id).value).replace(/[,，円\s]/g,''); var n = parseFloat(v); return isNaN(n) ? 0 : n; }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+
+// 匿名の利用記録（入力内容は送らない。送るのはページ名・操作の種類・ランダムな番号だけ）
+var Track = (function(){
+  var EP = '/api/event', vid = '', local = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+  function ls(k, v){ try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch(e){ return null; } }
+  function off(){ return location.protocol === 'file:' || ls('dougubako-meta:notrack') === '1' || (local && ls('dougubako-meta:trackLocal') !== '1'); }
+  function id(){
+    if (vid) return vid;
+    vid = ls('dougubako-meta:vid');
+    if (!vid || !/^[0-9a-f]{16}$/.test(vid)){
+      var a = new Uint8Array(8); (window.crypto || window.msCrypto).getRandomValues(a);
+      vid = Array.prototype.map.call(a, function(b){ return ('0' + b.toString(16)).slice(-2); }).join('');
+      ls('dougubako-meta:vid', vid);
+    }
+    return vid;
+  }
+  var sent = {};
+  function send(ev){
+    if (off() || sent[ev]) return; sent[ev] = 1;
+    var body = JSON.stringify({t: SITE.page, e: ev, v: id()});
+    try {
+      if (navigator.sendBeacon && navigator.sendBeacon(EP, new Blob([body], {type: 'text/plain'}))) return;
+      fetch(EP, {method: 'POST', body: body, keepalive: true, headers: {'Content-Type': 'text/plain'}}).catch(function(){});
+    } catch(e){}
+  }
+  var isTool = SITE.tools.some(function(t){ return t.href.replace('.html','') === SITE.page; });
+  send('view');
+  if (isTool){
+    var used = function(ev){ if (ev.target && ev.target.closest && ev.target.closest('main')) { send('use'); document.removeEventListener('input', used, true); document.removeEventListener('change', used, true); } };
+    document.addEventListener('input', used, true); document.addEventListener('change', used, true);
+    window.addEventListener('beforeprint', function(){ send('print'); });
+  }
+  document.addEventListener('click', function(ev){
+    var b = ev.target && ev.target.closest && ev.target.closest('button,a'); if (!b) return;
+    if (b.id === 'csv') send('csv');
+    else if (b.id === 'btnExport') send('backup');
+    else if (b.id === 'btnImport') send('restore');
+    else if (b.classList.contains('appcard')) send('app:' + (b.getAttribute('data-app') || ''));
+    else if (b.href && b.href.indexOf('amazon.co.jp') > 0) send('amazon');
+  }, true);
+  return {send: send};
+})();

@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="ja"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>管理画面 - 個人事業主の道具箱</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%227%22 fill=%22%23333%22/%3E%3Ctext x=%2216%22 y=%2223%22 font-size=%2218%22 text-anchor=%22middle%22 fill=%22white%22%3E%E7%AE%A1%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+:root{--s1:#2a78d6;--s2:#eb6834;--grid:#e3ded3}
+@media (prefers-color-scheme:dark){:root{--s1:#3987e5;--s2:#d95926;--grid:#33393f}}
+.bar-top{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:8px 0 16px}
+.bar-top select{width:auto}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
+.tile .k{font-size:13px;color:var(--muted)} .tile .v{font-size:28px;font-weight:700;font-variant-numeric:tabular-nums}
+.tile .s{font-size:12px;color:var(--muted)}
+.legend{display:flex;gap:16px;font-size:13px;color:var(--muted);margin:4px 0}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px}
+.chart{position:relative} .chart svg{display:block;width:100%;height:auto;overflow:visible}
+.tip{position:absolute;pointer-events:none;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:12px;box-shadow:var(--shadow);white-space:nowrap;display:none}
+table.data{width:100%;border-collapse:collapse;font-size:14px}
+table.data th,table.data td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums}
+table.data th:first-child,table.data td:first-child{text-align:left}
+table.data th{font-size:12px;color:var(--muted);font-weight:600}
+.rate{display:inline-block;min-width:44px}
+.appgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px}
+.app{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+.app h3{margin:0 0 2px;font-size:16px} .app .src{font-size:11px;color:var(--muted)}
+.app dl{display:grid;grid-template-columns:1fr auto;gap:2px 10px;margin:10px 0;font-size:14px}
+.app dd{margin:0;text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+.app .msg{font-size:13px;color:var(--warn);margin-top:8px} .app .note2{font-size:12px;color:var(--muted)}
+.mini{margin-top:6px}
+#login{max-width:360px}
+.muted{color:var(--muted);font-size:13px}
+</style>
+</head><body>
+<main class="wrap">
+<h1>管理画面</h1>
+
+<div id="login" class="card" hidden>
+  <label for="pw">管理パスワード</label>
+  <input type="password" id="pw" autocomplete="current-password">
+  <p><button id="btnLogin">ログイン</button></p>
+  <p class="warn-text" id="loginMsg"></p>
+</div>
+
+<div id="dash" hidden>
+  <div class="bar-top">
+    <select id="days"><option value="7">直近7日</option><option value="30" selected>直近30日</option><option value="90">直近90日</option><option value="365">直近1年</option></select>
+    <button class="sub" id="btnReload">再読み込み</button>
+    <button class="sub" id="btnRefresh">アプリの数字を取り直す</button>
+    <button class="del" id="btnLogout">ログアウト</button>
+  </div>
+  <p class="muted" id="range"></p>
+
+  <h2>道具箱（toolbox.lucke.jp）</h2>
+  <div class="tiles" id="tiles"></div>
+  <h3>日別の人数</h3>
+  <div class="legend"><span><i style="background:var(--s1)"></i>見た人</span><span><i style="background:var(--s2)"></i>使った人（入力した人）</span></div>
+  <div class="chart" id="daily"><div class="tip"></div></div>
+  <h3>ツール別</h3>
+  <div class="table-scroll"><table class="data" id="tools"></table></div>
+  <p class="muted">人数は「端末の数」です（同じ端末は期間中1人として数えます）。利用率＝使った人÷見た人。印刷・CSVは、その操作をした人数です。</p>
+  <div id="extra"></div>
+
+  <h2>アプリ</h2>
+  <p class="muted" id="appsAt"></p>
+  <div class="appgrid" id="apps"></div>
+
+  <h2>この端末</h2>
+  <p><label class="check"><input type="checkbox" id="notrack"> この端末の利用を道具箱の集計に含めない（自分の操作で数字が増えないように）</label></p>
+</div>
+</main>
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var NAMES = {index:'トップ',gensen:'源泉徴収 逆算',invoice:'請求書・見積書',nouzei:'納税積立カレンダー',anbun:'家事按分',jikyu:'案件別 時給',shohizei:'消費税 比較',genka:'減価償却',inshi:'収入印紙',furusato:'ふるさと納税 上限',apps:'ほかのアプリ',backup:'バックアップ',privacy:'プライバシーポリシー','404':'404'};
+  var TOOLS = ['gensen','invoice','nouzei','anbun','jikyu','shohizei','genka','inshi','furusato'];
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  function n(x){ return x == null ? '—' : Number(x).toLocaleString('ja-JP'); }
+  function pct(a, b){ return b ? Math.round(a / b * 1000) / 10 + '%' : '—'; }
+  try { $('notrack').checked = localStorage.getItem('dougubako-meta:notrack') === '1'; } catch(e){}
+  $('notrack').onchange = function(){ try { localStorage.setItem('dougubako-meta:notrack', this.checked ? '1' : '0'); } catch(e){} };
+
+  function show(which){ $('login').hidden = which !== 'login'; $('dash').hidden = which !== 'dash'; if (which === 'login') $('pw').focus(); }
+  function load(refresh){
+    $('range').textContent = '読み込み中…';
+    fetch('/api/admin/stats?days=' + $('days').value + (refresh ? '&refresh=1' : ''), {credentials:'same-origin'}).then(function(r){
+      if (r.status === 401){ show('login'); return null; }
+      return r.json();
+    }).then(function(d){ if (d){ show('dash'); render(d); } }).catch(function(e){ $('range').textContent = '読み込めませんでした：' + e; show('dash'); });
+  }
+  $('btnLogin').onclick = function(){
+    $('loginMsg').textContent = '';
+    fetch('/api/admin/login', {method:'POST', credentials:'same-origin', headers:{'Content-Type':'application/json'}, body: JSON.stringify({password: $('pw').value})})
+      .then(function(r){ return r.json().then(function(j){ return {ok: r.ok, j: j}; }); })
+      .then(function(x){ if (x.ok){ $('pw').value = ''; load(); } else $('loginMsg').textContent = x.j.error || 'ログインできませんでした'; })
+      .catch(function(){ $('loginMsg').textContent = '通信に失敗しました'; });
+  };
+  $('pw').addEventListener('keydown', function(e){ if (e.key === 'Enter') $('btnLogin').click(); });
+  $('btnLogout').onclick = function(){ fetch('/api/admin/logout', {method:'POST', credentials:'same-origin'}).then(function(){ show('login'); }); };
+  $('btnReload').onclick = function(){ load(); };
+  $('btnRefresh').onclick = function(){ load(true); };
+  $('days').onchange = function(){ load(); };
+
+  function render(d){
+    $('range').textContent = d.from + ' 〜 ' + d.to + '（日本時間）';
+    var tb = d.toolbox, T = {}, tot = {view:0, use:0};
+    tb.byTool.forEach(function(r){ (T[r.tool] = T[r.tool] || {})[r.ev] = r.n; });
+    tb.total.forEach(function(r){ tot[r.ev] = r.n; });
+    var toolViews = 0, toolUses = 0; TOOLS.forEach(function(t){ toolViews += (T[t]||{}).view||0; toolUses += (T[t]||{}).use||0; });
+    $('tiles').innerHTML =
+      tile('サイトを見た人', n(tot.view), '全ページ合計（端末数）') +
+      tile('ツールを使った人', n(tot.use), '入力した端末数') +
+      tile('ツールの利用率', pct(toolUses, toolViews), 'ツール別の合計で計算');
+    lineChart($('daily'), d.from, d.to, tb.daily);
+    var rows = TOOLS.map(function(t){ var x = T[t] || {}; return {t:t, view:x.view||0, use:x.use||0, print:x.print||0, csv:x.csv||0, amazon:x.amazon||0}; })
+      .sort(function(a, b){ return b.view - a.view; });
+    $('tools').innerHTML = '<thead><tr><th>ツール</th><th>見た人</th><th>使った人</th><th>利用率</th><th>印刷・PDF</th><th>CSV</th><th>Amazon</th></tr></thead><tbody>' +
+      rows.map(function(r){ return '<tr><td>'+esc(NAMES[r.t])+'</td><td>'+n(r.view)+'</td><td>'+n(r.use)+'</td><td><span class="rate">'+pct(r.use, r.view)+'</span></td><td>'+n(r.print)+'</td><td>'+(r.t==='anbun'?n(r.csv):'—')+'</td><td>'+n(r.amazon)+'</td></tr>'; }).join('') + '</tbody>';
+    var other = ['index','apps','backup'].map(function(t){ var x = T[t] || {}; return {t:t, x:x}; });
+    var appClicks = Object.keys(T.apps || {}).filter(function(k){ return k.indexOf('app:') === 0; }).map(function(k){ return k.slice(4) + '：' + n(T.apps[k]); });
+    $('extra').innerHTML = '<p class="muted">トップを見た人 ' + n((T.index||{}).view||0) + '／ほかのアプリ一覧を見た人 ' + n((T.apps||{}).view||0) +
+      (appClicks.length ? '（アプリへ移動：' + esc(appClicks.join('、')) + '）' : '') + '／バックアップの書き出し ' + n((T.backup||{}).backup||0) + '・読み込み ' + n((T.backup||{}).restore||0) + '</p>';
+    $('appsAt').textContent = 'アプリの数字は ' + new Date(d.apps.at).toLocaleString('ja-JP') + ' 時点（10分ごとに更新）';
+    $('apps').innerHTML = d.apps.list.map(appCard).join('');
+    Array.prototype.forEach.call(document.querySelectorAll('.mini'), function(el){ barChart(el, JSON.parse(el.getAttribute('data-m'))); });
+  }
+  function tile(k, v, s){ return '<div class="tile"><div class="k">'+k+'</div><div class="v">'+v+'</div><div class="s">'+s+'</div></div>'; }
+  function appCard(a){
+    var head = '<h3><a href="'+esc(a.site)+'" target="_blank" rel="noopener">'+esc(a.name)+'</a></h3><div class="src">'+(a.type==='firebase'?'Firebase':'Supabase')+'</div>';
+    if (a.status !== 'ok') return '<div class="app">'+head+'<div class="msg">'+(a.status==='unset'?'未接続：':'エラー：')+esc(a.message)+'</div></div>';
+    var dl = '<dl><dt>登録ユーザー</dt><dd>'+n(a.users)+'</dd><dt>7日以内に利用</dt><dd>'+n(a.active7)+'</dd><dt>30日以内に利用</dt><dd>'+n(a.active30)+'</dd><dt>30日以内の新規登録</dt><dd>'+n(a.new30)+'</dd>' +
+      (a.counts||[]).map(function(c){ return '<dt>'+esc(c.label)+'</dt><dd'+(c.error?' title="'+esc(c.error)+'"':'')+'>'+(c.error?'取得失敗':n(c.n))+'</dd>'; }).join('') + '</dl>';
+    return '<div class="app">'+head+dl+'<div class="note2">月別の新規登録（12か月）</div><div class="chart mini" data-m="'+esc(JSON.stringify(a.monthly||[]))+'"><div class="tip"></div></div>' +
+      (a.activeNote?'<div class="note2">'+esc(a.activeNote)+'</div>':'') + (a.note?'<div class="note2">'+esc(a.note)+'</div>':'') + '</div>';
+  }
+  // 日別の折れ線（見た人・使った人）。ホバーでその日の数字を表示
+  function lineChart(box, from, to, rows){
+    var days = [], d = new Date(from + 'T00:00:00Z'), end = new Date(to + 'T00:00:00Z');
+    while (d <= end){ days.push(d.toISOString().slice(0,10)); d = new Date(d.getTime() + 864e5); }
+    var V = {}, U = {}; rows.forEach(function(r){ (r.ev === 'view' ? V : U)[r.day] = r.n; });
+    var W = Math.max(320, Math.round(box.clientWidth || 760)), H = 220, L = 36, R = 10, Tp = 10, B = 26, max = 1;
+    days.forEach(function(k){ max = Math.max(max, V[k]||0, U[k]||0); });
+    var step = Math.pow(10, Math.floor(Math.log10(max))), top = Math.ceil(max / step) * step; if (top / step > 5 && step >= 1) top = Math.ceil(max / (step*2)) * step * 2;
+    var x = function(i){ return L + (days.length < 2 ? (W-L-R)/2 : i * (W-L-R) / (days.length-1)); }, y = function(v){ return Tp + (H-Tp-B) * (1 - v / top); };
+    var g = '';
+    for (var k = 0; k <= 4; k++){ var v = Math.round(top * k / 4); g += '<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y(v)+'" y2="'+y(v)+'" stroke="var(--grid)" stroke-width="1"/><text x="'+(L-6)+'" y="'+(y(v)+4)+'" font-size="11" text-anchor="end" fill="var(--muted)">'+v+'</text>'; }
+    var every = Math.ceil(days.length / Math.max(3, Math.floor(W / 95)));
+    days.forEach(function(k, i){ if (i % every === 0 || i === days.length-1) g += '<text x="'+x(i)+'" y="'+(H-8)+'" font-size="11" text-anchor="middle" fill="var(--muted)">'+(+k.slice(5,7))+'/'+(+k.slice(8))+'</text>'; });
+    function path(M, c){ return '<polyline fill="none" stroke="'+c+'" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" points="'+days.map(function(k,i){ return x(i)+','+y(M[k]||0); }).join(' ')+'"/>'; }
+    box.querySelector('svg') && box.removeChild(box.querySelector('svg'));
+    box.insertAdjacentHTML('afterbegin', '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="日別の見た人・使った人">'+g+path(V,'var(--s1)')+path(U,'var(--s2)')+'<line class="cx" y1="'+Tp+'" y2="'+(H-B)+'" stroke="var(--muted)" stroke-width="1" visibility="hidden"/><circle class="d1" r="4" fill="var(--s1)" stroke="var(--surface)" stroke-width="2" visibility="hidden"/><circle class="d2" r="4" fill="var(--s2)" stroke="var(--surface)" stroke-width="2" visibility="hidden"/><rect x="'+L+'" y="0" width="'+(W-L-R)+'" height="'+H+'" fill="transparent"/></svg>');
+    var svg = box.querySelector('svg'), tip = box.querySelector('.tip');
+    svg.onmousemove = function(e){
+      var rc = svg.getBoundingClientRect(), px = (e.clientX - rc.left) * W / rc.width;
+      var i = Math.max(0, Math.min(days.length-1, Math.round((px - L) / ((W-L-R) / Math.max(1, days.length-1)))));
+      var k = days[i], cx = x(i);
+      svg.querySelector('.cx').setAttribute('x1', cx); svg.querySelector('.cx').setAttribute('x2', cx); svg.querySelector('.cx').setAttribute('visibility','visible');
+      var c1 = svg.querySelector('.d1'), c2 = svg.querySelector('.d2');
+      c1.setAttribute('cx', cx); c1.setAttribute('cy', y(V[k]||0)); c1.setAttribute('visibility','visible');
+      c2.setAttribute('cx', cx); c2.setAttribute('cy', y(U[k]||0)); c2.setAttribute('visibility','visible');
+      tip.innerHTML = '<b>'+k+'</b><br>見た人 '+(V[k]||0)+'<br>使った人 '+(U[k]||0)+'（'+pct(U[k]||0, V[k]||0)+'）';
+      tip.style.display = 'block';
+      var left = cx * rc.width / W + 12; if (left > rc.width - 150) left = cx * rc.width / W - 160;
+      tip.style.left = left + 'px'; tip.style.top = '8px';
+    };
+    svg.onmouseleave = function(){ tip.style.display = 'none'; ['.cx','.d1','.d2'].forEach(function(s){ svg.querySelector(s).setAttribute('visibility','hidden'); }); };
+  }
+  // 月別の新規登録（棒）。ホバーで数字
+  function barChart(box, months){
+    var W = 260, H = 70, B = 14, max = 1; months.forEach(function(m){ max = Math.max(max, m.n); });
+    var bw = W / months.length, s = '';
+    months.forEach(function(m, i){
+      var h = m.n ? Math.max(2, (H-B-4) * m.n / max) : 0;
+      s += '<g data-t="'+m.m+'：'+m.n+'人"><rect x="'+(i*bw)+'" y="0" width="'+bw+'" height="'+H+'" fill="transparent"/>' + (h ? '<rect x="'+(i*bw+2)+'" y="'+(H-B-h)+'" width="'+(bw-4)+'" height="'+h+'" rx="2" fill="var(--s1)"/>' : '') + '</g>';
+      if (i === 0 || i === months.length-1) s += '<text x="'+(i*bw+bw/2)+'" y="'+(H-2)+'" font-size="9" text-anchor="middle" fill="var(--muted)">'+m.m.slice(2).replace('-','/')+'</text>';
+    });
+    s += '<line x1="0" x2="'+W+'" y1="'+(H-B)+'" y2="'+(H-B)+'" stroke="var(--grid)"/>';
+    box.insertAdjacentHTML('afterbegin', '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="月別の新規登録">'+s+'</svg>');
+    var tip = box.querySelector('.tip');
+    box.querySelectorAll('g').forEach(function(g, i){
+      g.onmouseenter = function(){ tip.textContent = g.getAttribute('data-t'); tip.style.display = 'block'; tip.style.left = Math.min(i * box.clientWidth / months.length, box.clientWidth - 110) + 'px'; tip.style.top = '-30px'; };
+      g.onmouseleave = function(){ tip.style.display = 'none'; };
+    });
+  }
+  load();
+})();
+</script>
+</body></html>
